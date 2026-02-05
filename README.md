@@ -177,67 +177,7 @@ requests
 
 Ver `requirements.txt` para versiones específicas.
 
-## 🎨 Características del Dashboard
-
-### Selector de País
-- Alemania 🇩🇪
-- España 🇪🇸
-- Francia 🇫🇷
-- Italia 🇮🇹
-
-### Rango Temporal Configurable
-Slider interactivo para seleccionar el período de análisis (por defecto: últimos 12 meses)
-
-### Visualizaciones
-
-1. **KPIs (4 métricas principales)**
-   - Exportaciones totales
-   - Importaciones totales
-   - Balance comercial
-   - Tasa de cobertura (%)
-
-2. **Evolución Mensual**
-   - Líneas de exportaciones e importaciones
-   - Barras de balance comercial
-   - Doble eje Y para mejor visualización
-
-3. **Sunbursts de Sectores**
-   - Importaciones por sector (izquierda)
-   - Exportaciones por sector (derecha)
-   - Agrupación jerárquica por categorías
-
-4. **Bump Chart de Socios**
-   - Ranking evolutivo de top 10 socios comerciales
-   - Toggle entre exportaciones e importaciones
-   - Visualización de cambios de posición
-
-### Descarga de Datos
-Botón para descargar los datos filtrados en formato CSV
-
-## 📝 Notas Técnicas
-
-- **Cache**: Los datos se cachean durante 1 hora en Streamlit
-- **Actualización automática**: Si los datos tienen más de 7 días, se descargan automáticamente
-- **Formato de valores**: Millones (M) y Billones (B) de euros
-- **Período de datos**: Desde enero 2002 hasta el presente
-
-## 🔗 Enlaces
-
-- **Eurostat COMEXT**: https://ec.europa.eu/eurostat/web/international-trade-in-goods/data/database
-- **API Documentation**: https://wikis.ec.europa.eu/display/EUROSTATHELP/API+-+Getting+started+with+statistics+API
-
-## 📄 Licencia
-
-Este proyecto utiliza datos públicos de Eurostat. Los datos están sujetos a la [política de copyright de Eurostat](https://ec.europa.eu/eurostat/about-us/policies/copyright).
-
-## 👤 Autor
-
-Jaime Berdejo - [GitHub](https://github.com/jaimeberdejo)
-
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Por favor, abre un issue o pull request para sugerencias o mejoras.
-
 ---
 
 **Meteoconomics** - Datos reales desde la API oficial de Eurostat
+
