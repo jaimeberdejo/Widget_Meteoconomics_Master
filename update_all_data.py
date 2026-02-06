@@ -68,7 +68,7 @@ Ejemplos:
 
     # Definir ETLs a ejecutar
     etl_scripts = [
-        ('etl_data.py', 'Descarga unificada (bienes + socios + cuenta corriente)'),
+        ('etl_data.py', 'Descarga unificada (bienes agregados + socios bilaterales)'),
     ]
 
     start_total = datetime.now()
