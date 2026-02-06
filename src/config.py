@@ -1,5 +1,19 @@
 from pathlib import Path
-from etl import SECTORES_SITC
+
+# --- Sectores SITC ---
+SECTORES_SITC = {
+    '0': 'Alimentos y animales vivos',
+    '1': 'Bebidas y tabaco',
+    '2': 'Materiales crudos',
+    '3': 'Combustibles minerales',
+    '4': 'Aceites y grasas',
+    '5': 'Productos químicos',
+    '6': 'Manufacturas por material',
+    '7': 'Maquinaria y transporte',
+    '8': 'Manufacturas diversas',
+    '9': 'Otros',
+    'TOTAL': 'Total Comercio',
+}
 
 # --- Rutas de datos por país ---
 DATA_FOLDERS = {
