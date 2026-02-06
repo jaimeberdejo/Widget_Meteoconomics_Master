@@ -1,5 +1,8 @@
 from pathlib import Path
 
+# Raíz del proyecto (directorio que contiene widget_meteoconomics.py)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 # --- Sectores SITC ---
 SECTORES_SITC = {
     '0': 'Alimentos y animales vivos',
@@ -17,11 +20,11 @@ SECTORES_SITC = {
 
 # --- Rutas de datos por país ---
 DATA_FOLDERS = {
-    'eu': Path('data/eu'),
-    'us': Path('data/us'),
-    'gb': Path('data/gb'),
-    'jp': Path('data/jp'),
-    'ca': Path('data/ca'),
+    'eu': PROJECT_ROOT / 'data' / 'eu',
+    'us': PROJECT_ROOT / 'data' / 'us',
+    'gb': PROJECT_ROOT / 'data' / 'gb',
+    'jp': PROJECT_ROOT / 'data' / 'jp',
+    'ca': PROJECT_ROOT / 'data' / 'ca',
 }
 
 # --- Países disponibles para selección ---

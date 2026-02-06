@@ -3,10 +3,7 @@ Script maestro para actualizar todos los datos del widget
 Ejecuta ETLs de múltiples fuentes:
   - Eurostat (EU: DE, ES, FR, IT)
   - US Census Bureau (US)
-  - UK HMRC (GB)
-  - Japan e-Stat (JP)
-  - Canada Statistics (CA)
-  - ECB Exchange Rates (currency conversion)
+  - UN Comtrade (GB, JP, CA)
 """
 
 import subprocess
@@ -71,7 +68,7 @@ Ejemplos:
 
     print("=" * 80)
     print("ACTUALIZACION MAESTRA - WIDGET BALANZA COMERCIAL")
-    print("Fuentes: Eurostat, US Census, UK HMRC, Japan e-Stat, Canada StatCan")
+    print("Fuentes: Eurostat, US Census, UN Comtrade")
     print("=" * 80)
 
     # Forzar actualizacion
@@ -83,14 +80,12 @@ Ejemplos:
             'data/eu/comercio_socios.csv',
             'data/us/bienes_agregado.csv',
             'data/us/comercio_socios.csv',
-            'data/uk/bienes_agregado.csv',
-            'data/uk/comercio_socios.csv',
+            'data/gb/bienes_agregado.csv',
+            'data/gb/comercio_socios.csv',
             'data/jp/bienes_agregado.csv',
             'data/jp/comercio_socios.csv',
             'data/ca/bienes_agregado.csv',
             'data/ca/comercio_socios.csv',
-            # Tasas de cambio
-            'data/exchange_rates.csv',
         ]
         for file_name in files_to_clean:
             file_path = Path(file_name)
@@ -110,29 +105,13 @@ Ejemplos:
 
     # Países no-EU
     if not args.eu_only:
-        # Tasas de cambio (necesario para conversión)
-        etl_scripts.append(
-            ('etl/etl_currency.py', 'Tasas de cambio ECB', False)
-        )
         # US Census Bureau
         etl_scripts.append(
             ('etl/etl_us.py', 'US Census Bureau (Estados Unidos)', True)
         )
-        # UK HMRC
+        # UN Comtrade (UK, Japan, Canada)
         etl_scripts.append(
-            ('etl/etl_uk.py', 'UK HMRC (Reino Unido)', True)
-        )
-        # Japan e-Stat
-        etl_scripts.append(
-            ('etl/etl_japan.py', 'Japan e-Stat (Japón)', True)
-        )
-        # Canada StatCan
-        etl_scripts.append(
-            ('etl/etl_canada.py', 'Canada StatCan (Canadá)', True)
-        )
-        # Integrador final
-        etl_scripts.append(
-            ('etl/etl_integrator.py', 'Integración de todas las fuentes', False)
+            ('etl/etl_comtrade.py', 'UN Comtrade (GB, JP, CA)', True)
         )
 
     start_total = datetime.now()
@@ -168,7 +147,12 @@ Ejemplos:
         'data/eu/comercio_socios.csv',
         'data/us/bienes_agregado.csv',
         'data/us/comercio_socios.csv',
-        'data/exchange_rates.csv',
+        'data/gb/bienes_agregado.csv',
+        'data/gb/comercio_socios.csv',
+        'data/jp/bienes_agregado.csv',
+        'data/jp/comercio_socios.csv',
+        'data/ca/bienes_agregado.csv',
+        'data/ca/comercio_socios.csv',
     ]
     for file_name in data_files:
         file_path = Path(file_name)

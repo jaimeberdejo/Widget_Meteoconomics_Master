@@ -16,8 +16,8 @@ def load_goods_data():
                 df = pd.read_csv(file_path)
                 df['fecha'] = pd.to_datetime(df['fecha'])
                 all_dfs.append(df)
-            except Exception:
-                pass
+            except Exception as e:
+                st.warning(f"Error cargando {file_path}: {e}")
 
     if not all_dfs:
         st.error("No hay datos. Ejecuta los ETLs primero.")

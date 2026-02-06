@@ -19,6 +19,8 @@ from pathlib import Path
 import os
 import time
 
+from etl import SECTORES_SITC, SOCIOS_NOMBRES
+
 # ============================================================
 # CONSTANTES
 # ============================================================
@@ -67,33 +69,6 @@ PARTNER_CODES = {
     'VN': '5520',   # Vietnam
     'UA': '4623',   # Ukraine
     'CL': '3370',   # Chile
-}
-
-# Nombres de socios
-SOCIOS_NOMBRES = {
-    'AT': 'Austria', 'AU': 'Australia', 'BE': 'Belgica', 'BR': 'Brasil',
-    'CA': 'Canada', 'CH': 'Suiza', 'CL': 'Chile', 'CN': 'China',
-    'CZ': 'Republica Checa', 'DE': 'Alemania', 'ES': 'Espana',
-    'FR': 'Francia', 'GB': 'Reino Unido', 'IE': 'Irlanda', 'IN': 'India',
-    'IT': 'Italia', 'JP': 'Japon', 'KR': 'Corea del Sur', 'MX': 'Mexico',
-    'NL': 'Paises Bajos', 'NO': 'Noruega', 'PL': 'Polonia', 'PT': 'Portugal',
-    'RU': 'Rusia', 'SA': 'Arabia Saudita', 'SE': 'Suecia', 'SG': 'Singapur',
-    'TW': 'Taiwan', 'UA': 'Ucrania', 'VN': 'Vietnam',
-}
-
-# Sectores SITC (1 dígito)
-SECTORES_SITC = {
-    '0': 'Alimentos y animales vivos',
-    '1': 'Bebidas y tabaco',
-    '2': 'Materiales crudos',
-    '3': 'Combustibles minerales',
-    '4': 'Aceites y grasas',
-    '5': 'Productos químicos',
-    '6': 'Manufacturas por material',
-    '7': 'Maquinaria y transporte',
-    '8': 'Manufacturas diversas',
-    '9': 'Otros',
-    'TOTAL': 'Total Comercio',
 }
 
 # Archivos de salida
@@ -396,12 +371,6 @@ def download_us_socios(incremental=True):
                 df = _api_to_dataframe(data_imp)
                 df['fecha'] = time_period
                 df['importaciones'] = pd.to_numeric(df['GEN_VAL_MO'], errors='coerce')
-
-                # Merge con exportaciones del mismo período
-                if all_data and 'exportaciones' in all_data[-1].columns:
-                    # Ya tenemos exp, agregar imp
-                    pass
-
                 all_data.append(df[['fecha', 'CTY_CODE', 'importaciones']])
 
             time.sleep(0.2)

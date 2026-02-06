@@ -11,9 +11,11 @@ import argparse
 import io
 import requests
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlencode
+
+from etl import SECTORES_SITC, SOCIOS_NOMBRES
 
 # ============================================================
 # CONSTANTES
@@ -28,22 +30,10 @@ PARTNERS = [
     'NO', 'PL', 'PT', 'RU', 'SA', 'SE', 'SG', 'TW', 'UA', 'US', 'VN',
 ]
 
-SECTORES_SITC = {
-    '0': 'Alimentos y animales vivos', '1': 'Bebidas y tabaco',
-    '2': 'Materiales crudos', '3': 'Combustibles minerales',
-    '4': 'Aceites y grasas', '5': 'Productos químicos',
-    '6': 'Manufacturas por material', '7': 'Maquinaria y transporte',
-    '8': 'Manufacturas diversas', '9': 'Otros', 'TOTAL': 'Total Comercio',
-}
-
 # Archivos de salida
 DATA_DIR = Path(__file__).parent.parent / 'data' / 'eu'
 FILE_BIENES_AGREGADO = DATA_DIR / 'bienes_agregado.csv'
 FILE_COMERCIO_SOCIOS = DATA_DIR / 'comercio_socios.csv'
-
-# Mapeo codigos Eurostat BOP <-> ISO
-BOP_TO_ISO = {'EL': 'GR', 'UK': 'GB', 'CN_X_HK': 'CN'}
-ISO_TO_BOP = {v: k for k, v in BOP_TO_ISO.items()}
 
 # Headers HTTP comunes
 HTTP_HEADERS = {
@@ -252,9 +242,6 @@ def download_bienes_socios():
     return df_pivot
 
 
-
-
-
 # ============================================================
 # PREPARE: comercio_socios.csv (solo bienes)
 # ============================================================
@@ -276,17 +263,6 @@ def prepare_comercio_socios(df_goods):
     df_merged['pais_code'] = df_merged['reporter_code']
     df_merged['socio_code'] = df_merged['partner_code']
 
-    # Nombre socios (mapa basico para los 31)
-    SOCIOS_NOMBRES = {
-        'AT': 'Austria', 'AU': 'Australia', 'BE': 'Belgica', 'BR': 'Brasil',
-        'CA': 'Canada', 'CH': 'Suiza', 'CL': 'Chile', 'CN': 'China',
-        'CZ': 'Republica Checa', 'DE': 'Alemania', 'ES': 'Espana',
-        'FR': 'Francia', 'GB': 'Reino Unido', 'IE': 'Irlanda', 'IN': 'India',
-        'IT': 'Italia', 'JP': 'Japon', 'KR': 'Corea del Sur', 'MX': 'Mexico',
-        'NL': 'Paises Bajos', 'NO': 'Noruega', 'PL': 'Polonia', 'PT': 'Portugal',
-        'RU': 'Rusia', 'SA': 'Arabia Saudita', 'SE': 'Suecia', 'SG': 'Singapur',
-        'TW': 'Taiwan', 'UA': 'Ucrania', 'US': 'Estados Unidos', 'VN': 'Vietnam',
-    }
     df_merged['socio'] = df_merged['socio_code'].map(SOCIOS_NOMBRES).fillna(df_merged['socio_code'])
 
     # Columnas finales
@@ -324,38 +300,6 @@ def _find_code_col(columns, keyword):
         candidates.sort(key=len)
         return candidates[0]
     return None
-
-
-def update_data_if_needed():
-    """
-    Actualiza datos si no existen o tienen mas de 7 dias.
-    Retorna True si se actualizaron.
-    """
-    files = [FILE_BIENES_AGREGADO, FILE_COMERCIO_SOCIOS]
-
-    # Verificar existencia
-    if not all(f.exists() for f in files):
-        print("Archivos no encontrados, descargando...")
-        main(force=False)
-        return True
-
-    # Verificar tamano minimo
-    for f in files:
-        if f.stat().st_size < 1024:
-            print(f"Archivo corrupto ({f.name}), re-descargando...")
-            main(force=False)
-            return True
-
-    # Verificar antiguedad
-    oldest = min(datetime.fromtimestamp(f.stat().st_mtime) for f in files)
-    age = datetime.now() - oldest
-    if age > timedelta(days=7):
-        print(f"Cache antiguo ({age.days} dias), actualizando...")
-        main(force=False)
-        return True
-
-    print(f"Cache valido ({age.days} dias)")
-    return False
 
 
 # ============================================================
