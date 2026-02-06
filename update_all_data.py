@@ -1,6 +1,12 @@
 """
 Script maestro para actualizar todos los datos del widget
-Ejecuta el ETL unificado con manejo de errores y logging
+Ejecuta ETLs de múltiples fuentes:
+  - Eurostat (EU: DE, ES, FR, IT)
+  - US Census Bureau (US)
+  - UK HMRC (GB)
+  - Japan e-Stat (JP)
+  - Canada Statistics (CA)
+  - ECB Exchange Rates (currency conversion)
 """
 
 import subprocess
@@ -10,8 +16,17 @@ from pathlib import Path
 from datetime import datetime
 
 
-def run_etl_script(script_name, description):
+def run_etl_script(script_name, description, optional=False):
     """Ejecuta un script ETL con logging de tiempo"""
+    script_path = Path(script_name)
+    if not script_path.exists():
+        if optional:
+            print(f"\n  {description}: OMITIDO (script no encontrado)")
+            return True  # No cuenta como fallo si es opcional
+        else:
+            print(f"\n  ERROR: Script no encontrado: {script_name}")
+            return False
+
     print(f"\n{'='*80}")
     print(f"  {description}")
     print(f"{'='*80}\n")
@@ -40,24 +55,42 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Ejemplos:
-  python3 update_all_data.py              # Actualizar solo si cache expirado
+  python3 update_all_data.py              # Actualizar todos los datos
   python3 update_all_data.py --force      # Forzar actualizacion completa
+  python3 update_all_data.py --eu-only    # Solo datos de Eurostat (EU)
+  python3 update_all_data.py --non-eu     # Solo datos no-EU (US, UK, JP, CA)
         """
     )
     parser.add_argument('--force', action='store_true',
                        help='Forzar actualizacion eliminando cache')
+    parser.add_argument('--eu-only', action='store_true',
+                       help='Solo actualizar datos de Eurostat (EU)')
+    parser.add_argument('--non-eu', action='store_true',
+                       help='Solo actualizar datos no-EU (US, UK, JP, CA)')
     args = parser.parse_args()
 
     print("=" * 80)
     print("ACTUALIZACION MAESTRA - WIDGET BALANZA COMERCIAL")
+    print("Fuentes: Eurostat, US Census, UK HMRC, Japan e-Stat, Canada StatCan")
     print("=" * 80)
 
     # Forzar actualizacion
     if args.force:
         print("\n  FORZANDO ACTUALIZACION: Eliminando cache...")
         files_to_clean = [
-            'data/bienes_agregado.csv',
-            'data/comercio_socios.csv',
+            # Archivos por país
+            'data/eu/bienes_agregado.csv',
+            'data/eu/comercio_socios.csv',
+            'data/us/bienes_agregado.csv',
+            'data/us/comercio_socios.csv',
+            'data/uk/bienes_agregado.csv',
+            'data/uk/comercio_socios.csv',
+            'data/jp/bienes_agregado.csv',
+            'data/jp/comercio_socios.csv',
+            'data/ca/bienes_agregado.csv',
+            'data/ca/comercio_socios.csv',
+            # Tasas de cambio
+            'data/exchange_rates.csv',
         ]
         for file_name in files_to_clean:
             file_path = Path(file_name)
@@ -67,20 +100,52 @@ Ejemplos:
         print()
 
     # Definir ETLs a ejecutar
-    etl_scripts = [
-        ('etl_data.py', 'Descarga unificada (bienes agregados + socios bilaterales)'),
-    ]
+    etl_scripts = []
+
+    # Eurostat (países EU)
+    if not args.non_eu:
+        etl_scripts.append(
+            ('etl/etl_data.py', 'Eurostat (DE, ES, FR, IT)', False)
+        )
+
+    # Países no-EU
+    if not args.eu_only:
+        # Tasas de cambio (necesario para conversión)
+        etl_scripts.append(
+            ('etl/etl_currency.py', 'Tasas de cambio ECB', False)
+        )
+        # US Census Bureau
+        etl_scripts.append(
+            ('etl/etl_us.py', 'US Census Bureau (Estados Unidos)', True)
+        )
+        # UK HMRC
+        etl_scripts.append(
+            ('etl/etl_uk.py', 'UK HMRC (Reino Unido)', True)
+        )
+        # Japan e-Stat
+        etl_scripts.append(
+            ('etl/etl_japan.py', 'Japan e-Stat (Japón)', True)
+        )
+        # Canada StatCan
+        etl_scripts.append(
+            ('etl/etl_canada.py', 'Canada StatCan (Canadá)', True)
+        )
+        # Integrador final
+        etl_scripts.append(
+            ('etl/etl_integrator.py', 'Integración de todas las fuentes', False)
+        )
 
     start_total = datetime.now()
     success_count = 0
     failed_scripts = []
 
     # Ejecutar ETLs
-    for script, description in etl_scripts:
-        if run_etl_script(script, description):
+    for script, description, optional in etl_scripts:
+        if run_etl_script(script, description, optional):
             success_count += 1
         else:
-            failed_scripts.append(script)
+            if not optional:
+                failed_scripts.append(script)
 
     # Resumen
     elapsed_total = (datetime.now() - start_total).total_seconds()
@@ -96,12 +161,30 @@ Ejemplos:
         for script in failed_scripts:
             print(f"   - {script}")
 
-    if success_count == len(etl_scripts):
+    # Mostrar archivos generados
+    print(f"\n  Archivos de datos:")
+    data_files = [
+        'data/eu/bienes_agregado.csv',
+        'data/eu/comercio_socios.csv',
+        'data/us/bienes_agregado.csv',
+        'data/us/comercio_socios.csv',
+        'data/exchange_rates.csv',
+    ]
+    for file_name in data_files:
+        file_path = Path(file_name)
+        if file_path.exists():
+            size_mb = file_path.stat().st_size / 1024 / 1024
+            print(f"    {file_name}: {size_mb:.2f} MB")
+        else:
+            print(f"    {file_name}: NO EXISTE")
+
+    if not failed_scripts:
         print("\n  ACTUALIZACION COMPLETA - Todos los datos actualizados")
+        print("\n  Ejecuta el widget con: streamlit run widget_meteoconomics.py")
         sys.exit(0)
     else:
-        print("\n  ACTUALIZACION FALLIDA")
-        print("  Verifica conectividad y logs de error")
+        print("\n  ACTUALIZACION PARCIAL")
+        print("  Algunos scripts fallaron. Verifica logs de error.")
         sys.exit(1)
 
 

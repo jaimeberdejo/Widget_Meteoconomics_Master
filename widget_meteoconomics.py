@@ -16,14 +16,18 @@ from datetime import datetime
 
 sys.stderr = sys.__stderr__
 
-# Importar desde etl_data
-try:
-    from etl_data import update_data_if_needed, FILE_BIENES_AGREGADO, FILE_COMERCIO_SOCIOS
-except ImportError:
-    from pathlib import Path
-    FILE_BIENES_AGREGADO = Path('data/bienes_agregado.csv')
-    FILE_COMERCIO_SOCIOS = Path('data/comercio_socios.csv')
-    def update_data_if_needed(): return False
+# Configuración de rutas por país
+from pathlib import Path
+
+DATA_FOLDERS = {
+    'eu': Path('data/eu'),   # DE, ES, FR, IT
+    'us': Path('data/us'),   # US
+    'uk': Path('data/uk'),   # GB
+    'jp': Path('data/jp'),   # JP
+    'ca': Path('data/ca'),   # CA
+}
+
+def update_data_if_needed(): return False
 
 # --- CONFIGURACION DE PAGINA ---
 st.set_page_config(
@@ -55,7 +59,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- DATOS ---
-PAISES_V1 = {'ES': 'España', 'FR': 'Francia', 'DE': 'Alemania', 'IT': 'Italia'}
+# Países disponibles para selección (EU + nuevos países)
+PAISES_V1 = {
+    # EU (Eurostat)
+    'ES': 'España', 'FR': 'Francia', 'DE': 'Alemania', 'IT': 'Italia',
+    # Non-EU (nuevas fuentes)
+    'US': 'Estados Unidos', 'GB': 'Reino Unido', 'JP': 'Japón', 'CA': 'Canadá',
+}
 
 BANDERAS = {
     'ES': '🇪🇸', 'FR': '🇫🇷', 'DE': '🇩🇪', 'IT': '🇮🇹', 'GB': '🇬🇧',
@@ -140,20 +150,49 @@ def format_partner_name(code):
 
 @st.cache_data(ttl=3600)
 def load_goods_data():
-    if not FILE_BIENES_AGREGADO.exists():
-        st.error("Ejecuta 'python3 etl_data.py'")
+    """Carga datos de bienes de todas las carpetas de países."""
+    all_dfs = []
+
+    for folder_name, folder_path in DATA_FOLDERS.items():
+        file_path = folder_path / 'bienes_agregado.csv'
+        if file_path.exists():
+            try:
+                df = pd.read_csv(file_path)
+                df['fecha'] = pd.to_datetime(df['fecha'])
+                all_dfs.append(df)
+            except Exception:
+                pass
+
+    if not all_dfs:
+        st.error("No hay datos. Ejecuta los ETLs primero.")
         st.stop()
-    df = pd.read_csv(FILE_BIENES_AGREGADO)
-    df['fecha'] = pd.to_datetime(df['fecha'])
-    return df
+
+    return pd.concat(all_dfs, ignore_index=True)
 
 
 @st.cache_data(ttl=3600)
 def load_partners_data(country_code):
-    if not FILE_COMERCIO_SOCIOS.exists():
+    """Carga datos de socios comerciales para un país."""
+    # Determinar qué carpeta usar
+    if country_code in ['DE', 'ES', 'FR', 'IT']:
+        folder = DATA_FOLDERS['eu']
+    elif country_code == 'US':
+        folder = DATA_FOLDERS['us']
+    elif country_code == 'GB':
+        folder = DATA_FOLDERS['uk']
+    elif country_code == 'JP':
+        folder = DATA_FOLDERS['jp']
+    elif country_code == 'CA':
+        folder = DATA_FOLDERS['ca']
+    else:
         return None
+
+    file_path = folder / 'comercio_socios.csv'
+    if not file_path.exists():
+        return None
+
     try:
-        df = pd.read_csv(FILE_COMERCIO_SOCIOS)
+        df = pd.read_csv(file_path)
         df['fecha'] = pd.to_datetime(df['fecha'])
         df_c = df[df['pais_code'] == country_code]
         if df_c.empty:

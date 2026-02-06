@@ -37,7 +37,7 @@ SECTORES_SITC = {
 }
 
 # Archivos de salida
-DATA_DIR = Path('data')
+DATA_DIR = Path(__file__).parent.parent / 'data' / 'eu'
 FILE_BIENES_AGREGADO = DATA_DIR / 'bienes_agregado.csv'
 FILE_COMERCIO_SOCIOS = DATA_DIR / 'comercio_socios.csv'
 
