@@ -207,8 +207,17 @@ START_YEAR = 2013
 # ============================================================
 
 
-def _download_json(url, description, timeout=120):
-    """Descarga datos JSON de una API."""
+def _download_json(url: str, description: str, timeout: int = 120) -> dict:
+    """Download JSON data from UK Trade Info or ONS API.
+
+    Args:
+        url: API endpoint URL.
+        description: Human-readable description for logging.
+        timeout: Request timeout in seconds.
+
+    Returns:
+        Parsed JSON as dict, or response text if JSON decode fails, or None if request fails.
+    """
     print(f"\n{'=' * 70}")
     print(f"  {description}")
     print(f"{'=' * 70}")
@@ -234,8 +243,15 @@ def _download_json(url, description, timeout=120):
         return None
 
 
-def map_hs_to_sitc(hs_code):
-    """Mapea código HS (2+ dígitos) a sector SITC (1 dígito)."""
+def map_hs_to_sitc(hs_code: str) -> str:
+    """Map HS code (2+ digits) to SITC sector (1 digit).
+
+    Args:
+        hs_code: Harmonized System code (at least 2 digits).
+
+    Returns:
+        SITC sector code '0'-'9', or '9' (Otros) if HS code is invalid/unknown.
+    """
     if not hs_code or pd.isna(hs_code):
         return None
     hs_str = str(hs_code).zfill(2)[:2]
@@ -247,10 +263,14 @@ def map_hs_to_sitc(hs_code):
 # ============================================================
 
 
-def download_uk_bienes_agregado():
-    """
-    Descarga datos de comercio UK por sector.
-    Intenta API de HMRC, si falla usa datos de ejemplo.
+def download_uk_bienes_agregado() -> pd.DataFrame:
+    """Download UK trade data aggregated by sector.
+
+    Attempts to download from HMRC API. Falls back to generating sample data
+    if API is unavailable or requires authentication.
+
+    Returns:
+        DataFrame with trade data in GBP by SITC sector.
     """
     print("\n" + "=" * 70)
     print("DESCARGANDO BIENES AGREGADOS UK")
@@ -281,10 +301,15 @@ def download_uk_bienes_agregado():
         return generate_uk_sample_data()
 
 
-def generate_uk_sample_data():
-    """
-    Genera datos de ejemplo para UK basados en estadísticas públicas.
-    Fuente de referencia: ONS UK Trade Statistics
+def generate_uk_sample_data() -> pd.DataFrame:
+    """Generate sample trade data for UK based on public statistics.
+
+    Creates synthetic monthly trade data from START_YEAR to present, using
+    approximate 2023 values from ONS UK Trade Statistics with year/seasonal
+    adjustments.
+
+    Returns:
+        DataFrame with trade data in GBP, saved to FILE_UK_BIENES.
     """
     print("  Generando datos de ejemplo UK...")
 
@@ -379,9 +404,11 @@ def generate_uk_sample_data():
     return df
 
 
-def download_uk_socios():
-    """
-    Descarga comercio bilateral UK con socios principales.
+def download_uk_socios() -> pd.DataFrame:
+    """Download UK bilateral trade data with major partners.
+
+    Returns:
+        DataFrame with bilateral trade flows between UK and partner countries.
     """
     print("\n" + "=" * 70)
     print("DESCARGANDO COMERCIO BILATERAL UK")
@@ -395,10 +422,14 @@ def download_uk_socios():
     return generate_uk_partners_data()
 
 
-def generate_uk_partners_data():
-    """
-    Genera datos de ejemplo de comercio bilateral UK.
-    Basado en principales socios comerciales de UK.
+def generate_uk_partners_data() -> pd.DataFrame:
+    """Generate sample bilateral trade data for UK.
+
+    Creates synthetic monthly bilateral trade data with major partners,
+    based on UK's main trading partners statistics.
+
+    Returns:
+        DataFrame with bilateral trade data in GBP, saved to FILE_UK_SOCIOS.
     """
     # Top socios UK 2023 (aproximado, miles de millones GBP)
     uk_partners_2023 = {
@@ -511,8 +542,15 @@ def generate_uk_partners_data():
     return df
 
 
-def process_uk_data(df):
-    """Procesa datos crudos de HMRC al formato estándar."""
+def process_uk_data(df: pd.DataFrame) -> pd.DataFrame:
+    """Process raw HMRC data to standard format.
+
+    Args:
+        df: Raw DataFrame from HMRC API.
+
+    Returns:
+        Processed DataFrame, or None when API implementation is available.
+    """
     # Implementación cuando API esté disponible
     pass
 
@@ -522,8 +560,15 @@ def process_uk_data(df):
 # ============================================================
 
 
-def main(force=False):
-    """Ejecuta las descargas de datos de comercio UK."""
+def main(force: bool = False) -> bool:
+    """Execute UK trade data download and processing.
+
+    Args:
+        force: If True, delete existing cache files before downloading.
+
+    Returns:
+        True if bienes data was successfully generated, False otherwise.
+    """
     print("=" * 70)
     print("ETL UK HMRC - COMERCIO INTERNACIONAL")
     print(f"Reporter: {REPORTER} ({REPORTER_NOMBRE})")

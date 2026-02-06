@@ -142,8 +142,17 @@ START_YEAR = 2010  # SITC data available from 2010
 # ============================================================
 
 
-def _call_census_api(url, description, timeout=120):
-    """Llama a la API de Census y retorna lista de listas."""
+def _call_census_api(url: str, description: str, timeout: int = 120) -> list:
+    """Call US Census Bureau API and return list of lists.
+
+    Args:
+        url: Census API endpoint URL with parameters.
+        description: Human-readable description for logging.
+        timeout: Request timeout in seconds.
+
+    Returns:
+        JSON response as list of lists (first row is headers), or None if request fails.
+    """
     print(f"  {description}...", end=" ", flush=True)
 
     try:
@@ -169,8 +178,15 @@ def _call_census_api(url, description, timeout=120):
         return None
 
 
-def _api_to_dataframe(data):
-    """Convierte respuesta API a DataFrame."""
+def _api_to_dataframe(data: list) -> pd.DataFrame:
+    """Convert Census API response to DataFrame.
+
+    Args:
+        data: List of lists where first row is headers.
+
+    Returns:
+        DataFrame with headers from first row, or empty DataFrame if data is invalid.
+    """
     if not data or len(data) < 2:
         return pd.DataFrame()
     headers = data[0]
@@ -183,8 +199,15 @@ def _api_to_dataframe(data):
 # ============================================================
 
 
-def _get_last_date_from_file(file_path):
-    """Obtiene la última fecha de un archivo CSV existente."""
+def _get_last_date_from_file(file_path: Path) -> pd.Timestamp:
+    """Get the last date from an existing CSV file.
+
+    Args:
+        file_path: Path to CSV file with 'fecha' column.
+
+    Returns:
+        Latest date in the file as Timestamp, or None if file doesn't exist or fails to read.
+    """
     if not file_path.exists():
         return None
     try:
@@ -195,15 +218,22 @@ def _get_last_date_from_file(file_path):
         return None
 
 
-def download_us_bienes_agregado(incremental=True):
-    """
-    Descarga exportaciones e importaciones de US por sector SITC.
-    - Exportaciones: ALL_VAL_MO
-    - Importaciones: GEN_VAL_MO
-    - SITC="-" indica TOTAL
-    - Agrega por primer dígito SITC
+def download_us_bienes_agregado(incremental: bool = True) -> pd.DataFrame:
+    """Download US exports and imports by SITC sector.
 
-    Si incremental=True, solo descarga meses nuevos desde la última fecha existente.
+    Downloads from Census Bureau timeseries API:
+    - Exports: ALL_VAL_MO (All Value Monthly)
+    - Imports: GEN_VAL_MO (General Value Monthly)
+    - SITC="-" indicates TOTAL
+    - Aggregates by first digit of SITC code
+
+    Args:
+        incremental: If True, only downloads new months since last file date.
+                    If False, downloads all data from START_YEAR.
+
+    Returns:
+        DataFrame with trade data in USD by sector, saved to FILE_US_BIENES.
+        Returns None if API key is missing or download fails.
     """
     print("\n" + "=" * 70)
     print("DESCARGANDO BIENES AGREGADOS US (SITC)")
@@ -348,8 +378,17 @@ def download_us_bienes_agregado(incremental=True):
     return df_final
 
 
-def _process_sitc_data(df, flow_name):
-    """Procesa datos SITC: agrupa por primer dígito + extrae TOTAL."""
+def _process_sitc_data(df: pd.DataFrame, flow_name: str) -> pd.DataFrame:
+    """Process SITC data: aggregate by first digit + extract TOTAL.
+
+    Args:
+        df: Raw DataFrame from Census API with SITC codes.
+        flow_name: Column name for the flow ('exportaciones' or 'importaciones').
+
+    Returns:
+        DataFrame with fecha, sector_code (0-9 or TOTAL), and flow value.
+        Returns empty DataFrame if input is empty.
+    """
     if df.empty:
         return pd.DataFrame()
 
@@ -381,12 +420,19 @@ def _process_sitc_data(df, flow_name):
 # ============================================================
 
 
-def download_us_socios(incremental=True):
-    """
-    Descarga comercio bilateral de US con principales socios.
-    Solo TOTAL (sin desglose por SITC) para simplificar.
+def download_us_socios(incremental: bool = True) -> pd.DataFrame:
+    """Download US bilateral trade with major partners.
 
-    Si incremental=True, solo descarga meses nuevos desde la última fecha existente.
+    Downloads TOTAL trade (no SITC breakdown) to simplify queries.
+    Uses CTY_CODE to filter for partners of interest.
+
+    Args:
+        incremental: If True, only downloads new months since last file date.
+                    If False, downloads all data from START_YEAR.
+
+    Returns:
+        DataFrame with bilateral trade in USD, saved to FILE_US_SOCIOS.
+        Returns None if API key is missing or download fails.
     """
     print("\n" + "=" * 70)
     print("DESCARGANDO COMERCIO BILATERAL US")
@@ -530,12 +576,16 @@ def download_us_socios(incremental=True):
 # ============================================================
 
 
-def main(force=False):
-    """Ejecuta las descargas de datos de comercio de US.
+def main(force: bool = False) -> bool:
+    """Execute US trade data downloads.
 
     Args:
-        force: Si True, descarga TODO desde START_YEAR.
-               Si False (default), modo incremental - solo meses nuevos.
+        force: If True, downloads ALL data from START_YEAR (full refresh).
+               If False (default), incremental mode - only downloads new months.
+
+    Returns:
+        True if bienes data was successfully generated, False otherwise.
+        Returns False immediately if CENSUS_API_KEY is not configured.
     """
     incremental = not force
 

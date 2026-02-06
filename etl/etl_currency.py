@@ -51,8 +51,17 @@ START_YEAR = 2002  # Para coincidir con Eurostat
 # ============================================================
 
 
-def _download_ecb(url, description, timeout=120):
-    """Descarga datos del ECB API."""
+def _download_ecb(url: str, description: str, timeout: int = 120) -> str:
+    """Download data from the ECB Statistical Data Warehouse API.
+
+    Args:
+        url: ECB API endpoint URL.
+        description: Human-readable description for logging.
+        timeout: Request timeout in seconds.
+
+    Returns:
+        Response text content, or None if request fails.
+    """
     print(f"\n{'=' * 70}")
     print(f"  {description}")
     print(f"{'=' * 70}")
@@ -78,11 +87,16 @@ def _download_ecb(url, description, timeout=120):
         return None
 
 
-def download_exchange_rates():
-    """
-    Descarga tasas de cambio mensuales del ECB.
-    Formato: 1 EUR = X unidades de moneda extranjera
-    Para convertir a EUR: valor_local / tasa
+def download_exchange_rates() -> pd.DataFrame:
+    """Download monthly exchange rates from ECB.
+
+    Downloads EUR exchange rates for USD, GBP, JPY, and CAD from the
+    European Central Bank Statistical Data Warehouse. Format: 1 EUR = X units
+    of foreign currency. To convert to EUR: local_value / rate.
+
+    Returns:
+        DataFrame with columns fecha (YYYY-MM) and rate columns for each currency.
+        Falls back to approximate rates if ECB data is unavailable.
     """
     print("\n" + "=" * 70)
     print("DESCARGANDO TASAS DE CAMBIO ECB")
@@ -154,10 +168,14 @@ def download_exchange_rates():
     return df_pivot
 
 
-def download_fallback_rates():
-    """
-    Tasas de respaldo aproximadas si ECB no está disponible.
-    Estas son promedios históricos recientes.
+def download_fallback_rates() -> pd.DataFrame:
+    """Generate fallback exchange rates if ECB is unavailable.
+
+    Uses approximate average rates from recent years (2020-2024) to create
+    a synthetic time series of exchange rates.
+
+    Returns:
+        DataFrame with fecha and currency rate columns, saved to FILE_EXCHANGE_RATES.
     """
     print("\n  Generando tasas de respaldo...")
 
@@ -193,8 +211,14 @@ def download_fallback_rates():
     return df
 
 
-def load_exchange_rates():
-    """Carga tasas de cambio del archivo CSV."""
+def load_exchange_rates() -> pd.DataFrame:
+    """Load exchange rates from CSV file.
+
+    If the file doesn't exist, triggers download_exchange_rates() to fetch data.
+
+    Returns:
+        DataFrame with exchange rates.
+    """
     if not FILE_EXCHANGE_RATES.exists():
         print("  Tasas de cambio no encontradas, descargando...")
         return download_exchange_rates()
@@ -203,18 +227,22 @@ def load_exchange_rates():
     return df
 
 
-def convert_to_eur(df, value_cols, currency_col="moneda_original", rates_df=None):
-    """
-    Convierte valores de moneda local a EUR.
+def convert_to_eur(
+    df: pd.DataFrame,
+    value_cols: list,
+    currency_col: str = "moneda_original",
+    rates_df: pd.DataFrame = None,
+) -> pd.DataFrame:
+    """Convert values from local currency to EUR using ECB rates.
 
     Args:
-        df: DataFrame con valores a convertir
-        value_cols: Lista de columnas con valores monetarios
-        currency_col: Columna que indica la moneda original
-        rates_df: DataFrame con tasas (opcional, se carga si no se proporciona)
+        df: DataFrame with values to convert.
+        value_cols: List of column names containing monetary values.
+        currency_col: Column name indicating the original currency (USD, GBP, JPY, CAD).
+        rates_df: Optional DataFrame with exchange rates. Loaded if not provided.
 
     Returns:
-        DataFrame con columnas convertidas a EUR
+        DataFrame with specified value columns converted to EUR.
     """
     if rates_df is None:
         rates_df = load_exchange_rates()
@@ -267,8 +295,15 @@ def convert_to_eur(df, value_cols, currency_col="moneda_original", rates_df=None
 # ============================================================
 
 
-def main(force=False):
-    """Descarga tasas de cambio del ECB."""
+def main(force: bool = False) -> bool:
+    """Download ECB exchange rates.
+
+    Args:
+        force: If True, delete existing cache before downloading.
+
+    Returns:
+        True if rates were successfully downloaded, False otherwise.
+    """
     print("=" * 70)
     print("ETL TASAS DE CAMBIO - ECB")
     print(f"Monedas: {', '.join(CURRENCIES)}")

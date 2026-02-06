@@ -132,8 +132,10 @@ Widget_Meteoconomics_Master/
 ├── 🔧 etl/                       # Pipeline ETL
 │   ├── etl_data.py               # ETL Eurostat (UE)
 │   ├── etl_us.py                 # ETL US Census Bureau
-│   ├── etl_currency.py           # ETL tasas de cambio ECB
-│   └── etl_integrator.py         # Integración multi-fuente
+│   ├── etl_uk.py                 # ETL UK HMRC
+│   ├── etl_japan.py              # ETL Japan e-Stat
+│   ├── etl_canada.py             # ETL Canada StatCan
+│   └── etl_currency.py           # ETL tasas de cambio ECB
 │
 └── 💾 data/                      # Datos persistentes
     ├── eu/                       # Datos Unión Europea
@@ -156,12 +158,17 @@ graph TB
     A1[Eurostat API] --> B1[etl_data.py]
     A2[US Census API] --> B2[etl_us.py]
     A3[ECB API] --> B3[etl_currency.py]
+    A4[UK HMRC API] --> B4[etl_uk.py]
+    A5[Japan e-Stat API] --> B5[etl_japan.py]
+    A6[Canada StatCan API] --> B6[etl_canada.py]
     
-    B1 --> B4[etl_integrator.py]
-    B2 --> B4
-    B3 --> B4
+    B1 --> C1[CSV Files]
+    B2 --> C1
+    B3 --> C1
+    B4 --> C1
+    B5 --> C1
+    B6 --> C1
     
-    B4 --> C1[CSV Files]
     C1 --> D1[data_loader.py]
     D1 --> D2[charts.py]
     D2 --> D3[UI Interactiva]
@@ -177,8 +184,10 @@ graph TB
 | `src/config.py` | Variables globales y mapeos |
 | `etl/etl_data.py` | Extracción de datos Eurostat |
 | `etl/etl_us.py` | Extracción de datos US Census |
+| `etl/etl_uk.py` | Extracción de datos UK HMRC |
+| `etl/etl_japan.py` | Extracción de datos Japan e-Stat |
+| `etl/etl_canada.py` | Extracción de datos Canada StatCan |
 | `etl/etl_currency.py` | Extracción de tasas de cambio |
-| `etl/etl_integrator.py` | Normalización y combinación |
 
 ---
 

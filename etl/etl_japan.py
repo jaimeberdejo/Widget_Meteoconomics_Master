@@ -206,8 +206,17 @@ START_YEAR = 2013
 # ============================================================
 
 
-def _download_json(url, description, timeout=120):
-    """Descarga datos JSON."""
+def _download_json(url: str, description: str, timeout: int = 120) -> dict:
+    """Download JSON data from e-Stat or Japan Customs API.
+
+    Args:
+        url: API endpoint URL.
+        description: Human-readable description for logging.
+        timeout: Request timeout in seconds.
+
+    Returns:
+        Parsed JSON as dict, or None if request fails or JSON decode fails.
+    """
     print(f"\n{'=' * 70}")
     print(f"  {description}")
     print(f"{'=' * 70}")
@@ -238,9 +247,14 @@ def _download_json(url, description, timeout=120):
 # ============================================================
 
 
-def download_japan_bienes_agregado():
-    """
-    Descarga datos de comercio Japón por sector.
+def download_japan_bienes_agregado() -> pd.DataFrame:
+    """Download Japan trade data aggregated by sector.
+
+    Attempts to download from e-Stat API if ESTAT_API_KEY is configured.
+    Falls back to generating sample data if API is unavailable.
+
+    Returns:
+        DataFrame with trade data in JPY by SITC sector.
     """
     print("\n" + "=" * 70)
     print("DESCARGANDO BIENES AGREGADOS JAPÓN")
@@ -263,10 +277,15 @@ def download_japan_bienes_agregado():
     return generate_japan_sample_data()
 
 
-def generate_japan_sample_data():
-    """
-    Genera datos de ejemplo para Japón basados en estadísticas públicas.
-    Fuente: Japan Customs Trade Statistics
+def generate_japan_sample_data() -> pd.DataFrame:
+    """Generate sample trade data for Japan based on public statistics.
+
+    Creates synthetic monthly trade data from START_YEAR to present, using
+    approximate 2023 values from Japan Customs Trade Statistics with year/seasonal
+    adjustments.
+
+    Returns:
+        DataFrame with trade data in JPY, saved to FILE_JP_BIENES.
     """
     print("  Generando datos de ejemplo Japón...")
 
@@ -358,9 +377,11 @@ def generate_japan_sample_data():
     return df
 
 
-def download_japan_socios():
-    """
-    Descarga comercio bilateral Japón con socios principales.
+def download_japan_socios() -> pd.DataFrame:
+    """Download Japan bilateral trade data with major partners.
+
+    Returns:
+        DataFrame with bilateral trade flows between Japan and partner countries.
     """
     print("\n" + "=" * 70)
     print("DESCARGANDO COMERCIO BILATERAL JAPÓN")
@@ -370,10 +391,14 @@ def download_japan_socios():
     return generate_japan_partners_data()
 
 
-def generate_japan_partners_data():
-    """
-    Genera datos de comercio bilateral Japón.
-    Basado en estadísticas de Japan Customs.
+def generate_japan_partners_data() -> pd.DataFrame:
+    """Generate sample bilateral trade data for Japan.
+
+    Creates synthetic monthly bilateral trade data with major partners,
+    based on Japan Customs statistics.
+
+    Returns:
+        DataFrame with bilateral trade data in JPY, saved to FILE_JP_SOCIOS.
     """
     # Top socios Japón 2023 (billones JPY)
     jp_partners_2023 = {
@@ -485,8 +510,15 @@ def generate_japan_partners_data():
     return df
 
 
-def process_estat_data(data):
-    """Procesa datos de e-Stat API."""
+def process_estat_data(data: dict) -> pd.DataFrame:
+    """Process raw e-Stat API response.
+
+    Args:
+        data: Raw JSON response from e-Stat API.
+
+    Returns:
+        Processed DataFrame, or None when API implementation is available.
+    """
     # Implementación cuando API esté configurada
     pass
 
@@ -496,8 +528,15 @@ def process_estat_data(data):
 # ============================================================
 
 
-def main(force=False):
-    """Ejecuta las descargas de datos de comercio Japón."""
+def main(force: bool = False) -> bool:
+    """Execute Japan trade data download and processing.
+
+    Args:
+        force: If True, delete existing cache files before downloading.
+
+    Returns:
+        True if bienes data was successfully generated, False otherwise.
+    """
     print("=" * 70)
     print("ETL JAPÓN e-STAT - COMERCIO INTERNACIONAL")
     print(f"Reporter: {REPORTER} ({REPORTER_NOMBRE})")

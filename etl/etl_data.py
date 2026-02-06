@@ -94,8 +94,17 @@ CURRENT_YEAR = datetime.now().year
 # ============================================================
 
 
-def _download(url, description, timeout=300):
-    """Descarga una URL y retorna el contenido como string."""
+def _download(url: str, description: str, timeout: int = 300) -> str:
+    """Download content from a URL and return as string.
+
+    Args:
+        url: The URL to download from.
+        description: Human-readable description for logging.
+        timeout: Request timeout in seconds.
+
+    Returns:
+        Response text content, or None if request fails.
+    """
     print(f"\n{'=' * 70}")
     print(f"  {description}")
     print(f"{'=' * 70}")
@@ -118,8 +127,15 @@ def _download(url, description, timeout=300):
         return None
 
 
-def _read_csv(csv_text):
-    """Lee CSV text a DataFrame, filtrando filas sin OBS_VALUE."""
+def _read_csv(csv_text: str) -> pd.DataFrame:
+    """Read CSV text into DataFrame, filtering rows without OBS_VALUE.
+
+    Args:
+        csv_text: CSV content as string.
+
+    Returns:
+        DataFrame with numeric OBS_VALUE column, NA rows dropped.
+    """
     df = pd.read_csv(io.StringIO(csv_text))
     if "OBS_VALUE" in df.columns:
         df["OBS_VALUE"] = pd.to_numeric(df["OBS_VALUE"], errors="coerce")
@@ -132,10 +148,16 @@ def _read_csv(csv_text):
 # ============================================================
 
 
-def download_bienes_agregado():
-    """
-    DS-059331: Bienes por sector SITC, partner=WORLD, 4 reporters.
-    formatVersion=2.0, labels=name -> columnas pareadas (codigo + nombre).
+def download_bienes_agregado() -> pd.DataFrame:
+    """Download Eurostat goods trade data aggregated by SITC sector.
+
+    Downloads DS-059331 dataset for 4 EU reporters (DE, ES, FR, IT) with
+    WORLD as partner, broken down by SITC sectors. Uses formatVersion=2.0
+    with labels=name for paired columns (code + name).
+
+    Returns:
+        DataFrame with trade data by sector and reporter, or None if download fails.
+        Saved to FILE_BIENES_AGREGADO.
     """
     base = "https://ec.europa.eu/eurostat/api/comext/dissemination/sdmx/3.0/data/dataflow/ESTAT/ds-059331/1.0/*.*.*.*.*.*"
     products = ",".join(SECTORES_SITC.keys())
@@ -232,9 +254,14 @@ def download_bienes_agregado():
 # ============================================================
 
 
-def download_bienes_socios():
-    """
-    DS-059331: Bienes bilaterales, TOTAL product, 31 partners, 4 reporters.
+def download_bienes_socios() -> pd.DataFrame:
+    """Download Eurostat bilateral goods trade data with partners.
+
+    Downloads DS-059331 dataset for 4 EU reporters with 31 partner countries.
+    Only TOTAL product (no SITC breakdown) to keep data manageable.
+
+    Returns:
+        DataFrame with bilateral trade flows (exp_bienes, imp_bienes) or None if fails.
     """
     base = "https://ec.europa.eu/eurostat/api/comext/dissemination/sdmx/3.0/data/dataflow/ESTAT/ds-059331/1.0/*.*.*.*.*.*"
 
@@ -308,9 +335,16 @@ def download_bienes_socios():
 # ============================================================
 
 
-def prepare_comercio_socios(df_goods):
-    """
-    Prepara datos de bienes bilaterales (call 2) para el bump chart.
+def prepare_comercio_socios(df_goods: pd.DataFrame) -> pd.DataFrame:
+    """Prepare bilateral goods trade data for bump chart visualization.
+
+    Args:
+        df_goods: Raw bilateral goods trade DataFrame from download_bienes_socios.
+
+    Returns:
+        Processed DataFrame with standardized columns: fecha, pais, pais_code,
+        socio, socio_code, exportaciones, importaciones. Saved to FILE_COMERCIO_SOCIOS.
+        Returns None if input data is None.
     """
     if df_goods is None:
         print("  ERROR: No hay datos de bienes socios")
@@ -390,12 +424,19 @@ def prepare_comercio_socios(df_goods):
 # ============================================================
 
 
-def _find_code_col(columns, keyword):
-    """
-    Busca la columna de codigo para un campo dado.
-    formatVersion=2.0 con labels=name produce pares:
-      reporter, Reporter Name  (o similar)
-    La columna de codigo es la que coincide exactamente o es la primera del par.
+def _find_code_col(columns: list, keyword: str) -> str:
+    """Find the code column for a given field in Eurostat response.
+
+    With formatVersion=2.0 and labels=name, Eurostat produces column pairs
+    like: 'reporter', 'Reporter Name'. This function finds the code column
+    (the shorter one without 'Name').
+
+    Args:
+        columns: List of column names from DataFrame.
+        keyword: Keyword to search for (e.g., 'reporter', 'product').
+
+    Returns:
+        Column name for the code version, or None if not found.
     """
     keyword_lower = keyword.lower()
     candidates = []
@@ -413,10 +454,14 @@ def _find_code_col(columns, keyword):
     return None
 
 
-def update_data_if_needed():
-    """
-    Actualiza datos si no existen o tienen mas de 7 dias.
-    Retorna True si se actualizaron.
+def update_data_if_needed() -> bool:
+    """Update Eurostat data if files don't exist or are older than 7 days.
+
+    Checks existence, minimum size, and modification time of data files.
+    Triggers main() if update is needed.
+
+    Returns:
+        True if data was updated, False if cache is still valid.
     """
     files = [FILE_BIENES_AGREGADO, FILE_COMERCIO_SOCIOS]
 
@@ -450,8 +495,15 @@ def update_data_if_needed():
 # ============================================================
 
 
-def main(force=False):
-    """Ejecuta las 2 descargas y genera los 2 CSVs (solo bienes)."""
+def main(force: bool = False) -> bool:
+    """Execute the 2 Eurostat downloads and generate 2 CSV files (goods only).
+
+    Args:
+        force: If True, delete existing files before downloading.
+
+    Returns:
+        True if both downloads succeeded, False otherwise.
+    """
     print("=" * 70)
     print("ETL UNIFICADO - BALANZA COMERCIAL (SOLO BIENES)")
     print(f"Reporters: {', '.join(REPORTERS)} | Partners: {len(PARTNERS)}")
