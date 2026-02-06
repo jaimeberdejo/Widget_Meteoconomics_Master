@@ -24,86 +24,108 @@ import time
 # ============================================================
 
 # API Key - configurar como variable de entorno
-CENSUS_API_KEY = os.environ.get('CENSUS_API_KEY', '')
+CENSUS_API_KEY = os.environ.get("CENSUS_API_KEY", "")
 
 # Base URLs
 BASE_URL_EXPORTS = "https://api.census.gov/data/timeseries/intltrade/exports/sitc"
 BASE_URL_IMPORTS = "https://api.census.gov/data/timeseries/intltrade/imports/sitc"
 
 # Reporter
-REPORTER = 'US'
-REPORTER_NOMBRE = 'Estados Unidos'
+REPORTER = "US"
+REPORTER_NOMBRE = "Estados Unidos"
 
 # Códigos de país Census Bureau
 # Fuente: https://www.census.gov/foreign-trade/schedules/c/countrycode.html
 PARTNER_CODES = {
-    'DE': '4280',   # Germany
-    'ES': '4790',   # Spain
-    'FR': '4279',   # France
-    'IT': '4759',   # Italy
-    'GB': '4120',   # United Kingdom
-    'JP': '5880',   # Japan
-    'CN': '5700',   # China
-    'CA': '1220',   # Canada
-    'MX': '2010',   # Mexico
-    'KR': '5800',   # South Korea
-    'IN': '5330',   # India
-    'BR': '3510',   # Brazil
-    'AU': '6021',   # Australia
-    'NL': '4210',   # Netherlands
-    'CH': '2940',   # Switzerland
-    'BE': '4231',   # Belgium
-    'AT': '4330',   # Austria
-    'SE': '4010',   # Sweden
-    'NO': '4090',   # Norway
-    'PL': '4550',   # Poland
-    'CZ': '4351',   # Czech Republic
-    'PT': '4710',   # Portugal
-    'IE': '4190',   # Ireland
-    'RU': '4621',   # Russia
-    'SA': '5170',   # Saudi Arabia
-    'SG': '5590',   # Singapore
-    'TW': '5830',   # Taiwan
-    'VN': '5520',   # Vietnam
-    'UA': '4623',   # Ukraine
-    'CL': '3370',   # Chile
+    "DE": "4280",  # Germany
+    "ES": "4790",  # Spain
+    "FR": "4279",  # France
+    "IT": "4759",  # Italy
+    "GB": "4120",  # United Kingdom
+    "JP": "5880",  # Japan
+    "CN": "5700",  # China
+    "CA": "1220",  # Canada
+    "MX": "2010",  # Mexico
+    "KR": "5800",  # South Korea
+    "IN": "5330",  # India
+    "BR": "3510",  # Brazil
+    "AU": "6021",  # Australia
+    "NL": "4210",  # Netherlands
+    "CH": "2940",  # Switzerland
+    "BE": "4231",  # Belgium
+    "AT": "4330",  # Austria
+    "SE": "4010",  # Sweden
+    "NO": "4090",  # Norway
+    "PL": "4550",  # Poland
+    "CZ": "4351",  # Czech Republic
+    "PT": "4710",  # Portugal
+    "IE": "4190",  # Ireland
+    "RU": "4621",  # Russia
+    "SA": "5170",  # Saudi Arabia
+    "SG": "5590",  # Singapore
+    "TW": "5830",  # Taiwan
+    "VN": "5520",  # Vietnam
+    "UA": "4623",  # Ukraine
+    "CL": "3370",  # Chile
 }
 
 # Nombres de socios
 SOCIOS_NOMBRES = {
-    'AT': 'Austria', 'AU': 'Australia', 'BE': 'Belgica', 'BR': 'Brasil',
-    'CA': 'Canada', 'CH': 'Suiza', 'CL': 'Chile', 'CN': 'China',
-    'CZ': 'Republica Checa', 'DE': 'Alemania', 'ES': 'Espana',
-    'FR': 'Francia', 'GB': 'Reino Unido', 'IE': 'Irlanda', 'IN': 'India',
-    'IT': 'Italia', 'JP': 'Japon', 'KR': 'Corea del Sur', 'MX': 'Mexico',
-    'NL': 'Paises Bajos', 'NO': 'Noruega', 'PL': 'Polonia', 'PT': 'Portugal',
-    'RU': 'Rusia', 'SA': 'Arabia Saudita', 'SE': 'Suecia', 'SG': 'Singapur',
-    'TW': 'Taiwan', 'UA': 'Ucrania', 'VN': 'Vietnam',
+    "AT": "Austria",
+    "AU": "Australia",
+    "BE": "Belgica",
+    "BR": "Brasil",
+    "CA": "Canada",
+    "CH": "Suiza",
+    "CL": "Chile",
+    "CN": "China",
+    "CZ": "Republica Checa",
+    "DE": "Alemania",
+    "ES": "Espana",
+    "FR": "Francia",
+    "GB": "Reino Unido",
+    "IE": "Irlanda",
+    "IN": "India",
+    "IT": "Italia",
+    "JP": "Japon",
+    "KR": "Corea del Sur",
+    "MX": "Mexico",
+    "NL": "Paises Bajos",
+    "NO": "Noruega",
+    "PL": "Polonia",
+    "PT": "Portugal",
+    "RU": "Rusia",
+    "SA": "Arabia Saudita",
+    "SE": "Suecia",
+    "SG": "Singapur",
+    "TW": "Taiwan",
+    "UA": "Ucrania",
+    "VN": "Vietnam",
 }
 
 # Sectores SITC (1 dígito)
 SECTORES_SITC = {
-    '0': 'Alimentos y animales vivos',
-    '1': 'Bebidas y tabaco',
-    '2': 'Materiales crudos',
-    '3': 'Combustibles minerales',
-    '4': 'Aceites y grasas',
-    '5': 'Productos químicos',
-    '6': 'Manufacturas por material',
-    '7': 'Maquinaria y transporte',
-    '8': 'Manufacturas diversas',
-    '9': 'Otros',
-    'TOTAL': 'Total Comercio',
+    "0": "Alimentos y animales vivos",
+    "1": "Bebidas y tabaco",
+    "2": "Materiales crudos",
+    "3": "Combustibles minerales",
+    "4": "Aceites y grasas",
+    "5": "Productos químicos",
+    "6": "Manufacturas por material",
+    "7": "Maquinaria y transporte",
+    "8": "Manufacturas diversas",
+    "9": "Otros",
+    "TOTAL": "Total Comercio",
 }
 
 # Archivos de salida
-DATA_DIR = Path(__file__).parent.parent / 'data' / 'us'
-FILE_US_BIENES = DATA_DIR / 'bienes_agregado.csv'
-FILE_US_SOCIOS = DATA_DIR / 'comercio_socios.csv'
+DATA_DIR = Path(__file__).parent.parent / "data" / "us"
+FILE_US_BIENES = DATA_DIR / "bienes_agregado.csv"
+FILE_US_SOCIOS = DATA_DIR / "comercio_socios.csv"
 
 HTTP_HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-    'Accept': 'application/json',
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Accept": "application/json",
 }
 
 # Census data has ~2 month lag
@@ -119,8 +141,18 @@ START_YEAR = 2010  # SITC data available from 2010
 # FUNCIONES API
 # ============================================================
 
-def _call_census_api(url, description, timeout=120):
-    """Llama a la API de Census y retorna lista de listas."""
+
+def _call_census_api(url: str, description: str, timeout: int = 120) -> list:
+    """Call US Census Bureau API and return list of lists.
+
+    Args:
+        url: Census API endpoint URL with parameters.
+        description: Human-readable description for logging.
+        timeout: Request timeout in seconds.
+
+    Returns:
+        JSON response as list of lists (first row is headers), or None if request fails.
+    """
     print(f"  {description}...", end=" ", flush=True)
 
     try:
@@ -129,7 +161,7 @@ def _call_census_api(url, description, timeout=120):
         if response.status_code == 200:
             data = response.json()
             if isinstance(data, list) and len(data) > 1:
-                print(f"OK ({len(data)-1} registros)")
+                print(f"OK ({len(data) - 1} registros)")
                 return data
             else:
                 print("vacío")
@@ -146,8 +178,15 @@ def _call_census_api(url, description, timeout=120):
         return None
 
 
-def _api_to_dataframe(data):
-    """Convierte respuesta API a DataFrame."""
+def _api_to_dataframe(data: list) -> pd.DataFrame:
+    """Convert Census API response to DataFrame.
+
+    Args:
+        data: List of lists where first row is headers.
+
+    Returns:
+        DataFrame with headers from first row, or empty DataFrame if data is invalid.
+    """
     if not data or len(data) < 2:
         return pd.DataFrame()
     headers = data[0]
@@ -159,31 +198,46 @@ def _api_to_dataframe(data):
 # DESCARGA: Bienes agregados por sector SITC
 # ============================================================
 
-def _get_last_date_from_file(file_path):
-    """Obtiene la última fecha de un archivo CSV existente."""
+
+def _get_last_date_from_file(file_path: Path) -> pd.Timestamp:
+    """Get the last date from an existing CSV file.
+
+    Args:
+        file_path: Path to CSV file with 'fecha' column.
+
+    Returns:
+        Latest date in the file as Timestamp, or None if file doesn't exist or fails to read.
+    """
     if not file_path.exists():
         return None
     try:
         df = pd.read_csv(file_path)
-        df['fecha'] = pd.to_datetime(df['fecha'])
-        return df['fecha'].max()
+        df["fecha"] = pd.to_datetime(df["fecha"])
+        return df["fecha"].max()
     except Exception:
         return None
 
 
-def download_us_bienes_agregado(incremental=True):
-    """
-    Descarga exportaciones e importaciones de US por sector SITC.
-    - Exportaciones: ALL_VAL_MO
-    - Importaciones: GEN_VAL_MO
-    - SITC="-" indica TOTAL
-    - Agrega por primer dígito SITC
+def download_us_bienes_agregado(incremental: bool = True) -> pd.DataFrame:
+    """Download US exports and imports by SITC sector.
 
-    Si incremental=True, solo descarga meses nuevos desde la última fecha existente.
+    Downloads from Census Bureau timeseries API:
+    - Exports: ALL_VAL_MO (All Value Monthly)
+    - Imports: GEN_VAL_MO (General Value Monthly)
+    - SITC="-" indicates TOTAL
+    - Aggregates by first digit of SITC code
+
+    Args:
+        incremental: If True, only downloads new months since last file date.
+                    If False, downloads all data from START_YEAR.
+
+    Returns:
+        DataFrame with trade data in USD by sector, saved to FILE_US_BIENES.
+        Returns None if API key is missing or download fails.
     """
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("DESCARGANDO BIENES AGREGADOS US (SITC)")
-    print("="*70)
+    print("=" * 70)
 
     if not CENSUS_API_KEY:
         print("  ERROR: Se requiere CENSUS_API_KEY")
@@ -205,10 +259,12 @@ def download_us_bienes_agregado(incremental=True):
             if start_month > 12:
                 start_month = 1
                 start_year += 1
-            print(f"  Modo incremental: descargando desde {start_year}-{start_month:02d}")
+            print(
+                f"  Modo incremental: descargando desde {start_year}-{start_month:02d}"
+            )
             print(f"  (Última fecha existente: {last_date.strftime('%Y-%m')})")
             existing_df = pd.read_csv(FILE_US_BIENES)
-            existing_df['fecha'] = pd.to_datetime(existing_df['fecha'])
+            existing_df["fecha"] = pd.to_datetime(existing_df["fecha"])
         else:
             print(f"  No hay datos existentes, descargando todo desde {START_YEAR}")
 
@@ -224,27 +280,31 @@ def download_us_bienes_agregado(incremental=True):
             time_period = f"{year}-{month:02d}"
 
             # --- EXPORTACIONES ---
-            url_exp = (f"{BASE_URL_EXPORTS}?get=ALL_VAL_MO,SITC&time={time_period}"
-                      f"&key={CENSUS_API_KEY}")
+            url_exp = (
+                f"{BASE_URL_EXPORTS}?get=ALL_VAL_MO,SITC&time={time_period}"
+                f"&key={CENSUS_API_KEY}"
+            )
             data_exp = _call_census_api(url_exp, f"Exp {time_period}")
 
             if data_exp:
                 df = _api_to_dataframe(data_exp)
-                df['time'] = time_period
-                df['flow'] = 'exportaciones'
-                df['value'] = pd.to_numeric(df['ALL_VAL_MO'], errors='coerce')
+                df["time"] = time_period
+                df["flow"] = "exportaciones"
+                df["value"] = pd.to_numeric(df["ALL_VAL_MO"], errors="coerce")
                 all_exports.append(df)
 
             # --- IMPORTACIONES ---
-            url_imp = (f"{BASE_URL_IMPORTS}?get=GEN_VAL_MO,SITC&time={time_period}"
-                      f"&key={CENSUS_API_KEY}")
+            url_imp = (
+                f"{BASE_URL_IMPORTS}?get=GEN_VAL_MO,SITC&time={time_period}"
+                f"&key={CENSUS_API_KEY}"
+            )
             data_imp = _call_census_api(url_imp, f"Imp {time_period}")
 
             if data_imp:
                 df = _api_to_dataframe(data_imp)
-                df['time'] = time_period
-                df['flow'] = 'importaciones'
-                df['value'] = pd.to_numeric(df['GEN_VAL_MO'], errors='coerce')
+                df["time"] = time_period
+                df["flow"] = "importaciones"
+                df["value"] = pd.to_numeric(df["GEN_VAL_MO"], errors="coerce")
                 all_imports.append(df)
 
             # Rate limiting
@@ -255,12 +315,16 @@ def download_us_bienes_agregado(incremental=True):
         return None
 
     # Combinar y procesar
-    df_exp = pd.concat(all_exports, ignore_index=True) if all_exports else pd.DataFrame()
-    df_imp = pd.concat(all_imports, ignore_index=True) if all_imports else pd.DataFrame()
+    df_exp = (
+        pd.concat(all_exports, ignore_index=True) if all_exports else pd.DataFrame()
+    )
+    df_imp = (
+        pd.concat(all_imports, ignore_index=True) if all_imports else pd.DataFrame()
+    )
 
     # Procesar exportaciones
-    result_exp = _process_sitc_data(df_exp, 'exportaciones')
-    result_imp = _process_sitc_data(df_imp, 'importaciones')
+    result_exp = _process_sitc_data(df_exp, "exportaciones")
+    result_imp = _process_sitc_data(df_imp, "importaciones")
 
     # Merge exportaciones e importaciones
     if result_exp.empty or result_imp.empty:
@@ -268,32 +332,43 @@ def download_us_bienes_agregado(incremental=True):
         return None
 
     df_merged = result_exp.merge(
-        result_imp[['fecha', 'sector_code', 'importaciones']],
-        on=['fecha', 'sector_code'],
-        how='outer'
+        result_imp[["fecha", "sector_code", "importaciones"]],
+        on=["fecha", "sector_code"],
+        how="outer",
     ).fillna(0)
 
-    df_merged['balance'] = df_merged['exportaciones'] - df_merged['importaciones']
-    df_merged['pais'] = REPORTER_NOMBRE
-    df_merged['pais_code'] = REPORTER
-    df_merged['sector'] = df_merged['sector_code'].map(SECTORES_SITC)
-    df_merged['moneda_original'] = 'USD'
+    df_merged["balance"] = df_merged["exportaciones"] - df_merged["importaciones"]
+    df_merged["pais"] = REPORTER_NOMBRE
+    df_merged["pais_code"] = REPORTER
+    df_merged["sector"] = df_merged["sector_code"].map(SECTORES_SITC)
+    df_merged["moneda_original"] = "USD"
 
     # Reordenar
-    cols = ['fecha', 'pais', 'pais_code', 'sector', 'sector_code',
-            'exportaciones', 'importaciones', 'balance', 'moneda_original']
+    cols = [
+        "fecha",
+        "pais",
+        "pais_code",
+        "sector",
+        "sector_code",
+        "exportaciones",
+        "importaciones",
+        "balance",
+        "moneda_original",
+    ]
     df_new = df_merged[[c for c in cols if c in df_merged.columns]]
 
     # Combinar con datos existentes si es incremental
     if existing_df is not None and not df_new.empty:
         df_final = pd.concat([existing_df, df_new], ignore_index=True)
-        df_final = df_final.drop_duplicates(subset=['fecha', 'sector_code'], keep='last')
+        df_final = df_final.drop_duplicates(
+            subset=["fecha", "sector_code"], keep="last"
+        )
         print(f"\n  Datos existentes: {len(existing_df):,} filas")
         print(f"  Datos nuevos: {len(df_new):,} filas")
     else:
         df_final = df_new
 
-    df_final = df_final.sort_values(['sector_code', 'fecha'])
+    df_final = df_final.sort_values(["sector_code", "fecha"])
 
     # Guardar
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -303,26 +378,37 @@ def download_us_bienes_agregado(incremental=True):
     return df_final
 
 
-def _process_sitc_data(df, flow_name):
-    """Procesa datos SITC: agrupa por primer dígito + extrae TOTAL."""
+def _process_sitc_data(df: pd.DataFrame, flow_name: str) -> pd.DataFrame:
+    """Process SITC data: aggregate by first digit + extract TOTAL.
+
+    Args:
+        df: Raw DataFrame from Census API with SITC codes.
+        flow_name: Column name for the flow ('exportaciones' or 'importaciones').
+
+    Returns:
+        DataFrame with fecha, sector_code (0-9 or TOTAL), and flow value.
+        Returns empty DataFrame if input is empty.
+    """
     if df.empty:
         return pd.DataFrame()
 
     # Separar TOTAL (SITC="-") y detalle
-    df_total = df[df['SITC'] == '-'].copy()
-    df_detail = df[df['SITC'] != '-'].copy()
+    df_total = df[df["SITC"] == "-"].copy()
+    df_detail = df[df["SITC"] != "-"].copy()
 
     # Agregar detalle por primer dígito SITC
-    df_detail['sector_code'] = df_detail['SITC'].astype(str).str[0]
-    df_detail = df_detail[df_detail['sector_code'].isin(list('0123456789'))]
+    df_detail["sector_code"] = df_detail["SITC"].astype(str).str[0]
+    df_detail = df_detail[df_detail["sector_code"].isin(list("0123456789"))]
 
-    df_by_sector = df_detail.groupby(['time', 'sector_code'])['value'].sum().reset_index()
-    df_by_sector.columns = ['fecha', 'sector_code', flow_name]
+    df_by_sector = (
+        df_detail.groupby(["time", "sector_code"])["value"].sum().reset_index()
+    )
+    df_by_sector.columns = ["fecha", "sector_code", flow_name]
 
     # Agregar TOTAL
-    df_total_agg = df_total.groupby('time')['value'].sum().reset_index()
-    df_total_agg.columns = ['fecha', flow_name]
-    df_total_agg['sector_code'] = 'TOTAL'
+    df_total_agg = df_total.groupby("time")["value"].sum().reset_index()
+    df_total_agg.columns = ["fecha", flow_name]
+    df_total_agg["sector_code"] = "TOTAL"
 
     # Combinar
     result = pd.concat([df_by_sector, df_total_agg], ignore_index=True)
@@ -333,16 +419,24 @@ def _process_sitc_data(df, flow_name):
 # DESCARGA: Comercio bilateral con socios
 # ============================================================
 
-def download_us_socios(incremental=True):
-    """
-    Descarga comercio bilateral de US con principales socios.
-    Solo TOTAL (sin desglose por SITC) para simplificar.
 
-    Si incremental=True, solo descarga meses nuevos desde la última fecha existente.
+def download_us_socios(incremental: bool = True) -> pd.DataFrame:
+    """Download US bilateral trade with major partners.
+
+    Downloads TOTAL trade (no SITC breakdown) to simplify queries.
+    Uses CTY_CODE to filter for partners of interest.
+
+    Args:
+        incremental: If True, only downloads new months since last file date.
+                    If False, downloads all data from START_YEAR.
+
+    Returns:
+        DataFrame with bilateral trade in USD, saved to FILE_US_SOCIOS.
+        Returns None if API key is missing or download fails.
     """
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("DESCARGANDO COMERCIO BILATERAL US")
-    print("="*70)
+    print("=" * 70)
 
     if not CENSUS_API_KEY:
         print("  ERROR: Se requiere CENSUS_API_KEY")
@@ -361,9 +455,11 @@ def download_us_socios(incremental=True):
             if start_month > 12:
                 start_month = 1
                 start_year += 1
-            print(f"  Modo incremental: descargando desde {start_year}-{start_month:02d}")
+            print(
+                f"  Modo incremental: descargando desde {start_year}-{start_month:02d}"
+            )
             existing_df = pd.read_csv(FILE_US_SOCIOS)
-            existing_df['fecha'] = pd.to_datetime(existing_df['fecha'])
+            existing_df["fecha"] = pd.to_datetime(existing_df["fecha"])
 
     all_data = []
 
@@ -377,32 +473,36 @@ def download_us_socios(incremental=True):
 
             # Descargar todos los países de una vez (más eficiente)
             # --- EXPORTACIONES ---
-            url_exp = (f"{BASE_URL_EXPORTS}?get=ALL_VAL_MO,CTY_CODE&time={time_period}"
-                      f"&SITC=-&key={CENSUS_API_KEY}")
+            url_exp = (
+                f"{BASE_URL_EXPORTS}?get=ALL_VAL_MO,CTY_CODE&time={time_period}"
+                f"&SITC=-&key={CENSUS_API_KEY}"
+            )
             data_exp = _call_census_api(url_exp, f"Exp socios {time_period}")
 
             if data_exp:
                 df = _api_to_dataframe(data_exp)
-                df['fecha'] = time_period
-                df['exportaciones'] = pd.to_numeric(df['ALL_VAL_MO'], errors='coerce')
-                all_data.append(df[['fecha', 'CTY_CODE', 'exportaciones']])
+                df["fecha"] = time_period
+                df["exportaciones"] = pd.to_numeric(df["ALL_VAL_MO"], errors="coerce")
+                all_data.append(df[["fecha", "CTY_CODE", "exportaciones"]])
 
             # --- IMPORTACIONES ---
-            url_imp = (f"{BASE_URL_IMPORTS}?get=GEN_VAL_MO,CTY_CODE&time={time_period}"
-                      f"&SITC=-&key={CENSUS_API_KEY}")
+            url_imp = (
+                f"{BASE_URL_IMPORTS}?get=GEN_VAL_MO,CTY_CODE&time={time_period}"
+                f"&SITC=-&key={CENSUS_API_KEY}"
+            )
             data_imp = _call_census_api(url_imp, f"Imp socios {time_period}")
 
             if data_imp:
                 df = _api_to_dataframe(data_imp)
-                df['fecha'] = time_period
-                df['importaciones'] = pd.to_numeric(df['GEN_VAL_MO'], errors='coerce')
+                df["fecha"] = time_period
+                df["importaciones"] = pd.to_numeric(df["GEN_VAL_MO"], errors="coerce")
 
                 # Merge con exportaciones del mismo período
-                if all_data and 'exportaciones' in all_data[-1].columns:
+                if all_data and "exportaciones" in all_data[-1].columns:
                     # Ya tenemos exp, agregar imp
                     pass
 
-                all_data.append(df[['fecha', 'CTY_CODE', 'importaciones']])
+                all_data.append(df[["fecha", "CTY_CODE", "importaciones"]])
 
             time.sleep(0.2)
 
@@ -414,37 +514,55 @@ def download_us_socios(incremental=True):
     df_all = pd.concat(all_data, ignore_index=True)
 
     # Agrupar por fecha y país
-    df_exp = df_all[df_all['exportaciones'].notna()].groupby(['fecha', 'CTY_CODE'])['exportaciones'].sum().reset_index()
-    df_imp = df_all[df_all['importaciones'].notna()].groupby(['fecha', 'CTY_CODE'])['importaciones'].sum().reset_index()
+    df_exp = (
+        df_all[df_all["exportaciones"].notna()]
+        .groupby(["fecha", "CTY_CODE"])["exportaciones"]
+        .sum()
+        .reset_index()
+    )
+    df_imp = (
+        df_all[df_all["importaciones"].notna()]
+        .groupby(["fecha", "CTY_CODE"])["importaciones"]
+        .sum()
+        .reset_index()
+    )
 
-    df_merged = df_exp.merge(df_imp, on=['fecha', 'CTY_CODE'], how='outer').fillna(0)
+    df_merged = df_exp.merge(df_imp, on=["fecha", "CTY_CODE"], how="outer").fillna(0)
 
     # Filtrar solo nuestros socios de interés
     census_to_iso = {v: k for k, v in PARTNER_CODES.items()}
-    df_merged['socio_code'] = df_merged['CTY_CODE'].map(census_to_iso)
-    df_merged = df_merged.dropna(subset=['socio_code'])
+    df_merged["socio_code"] = df_merged["CTY_CODE"].map(census_to_iso)
+    df_merged = df_merged.dropna(subset=["socio_code"])
 
     # Añadir info
-    df_merged['pais'] = REPORTER_NOMBRE
-    df_merged['pais_code'] = REPORTER
-    df_merged['socio'] = df_merged['socio_code'].map(SOCIOS_NOMBRES)
-    df_merged['moneda_original'] = 'USD'
+    df_merged["pais"] = REPORTER_NOMBRE
+    df_merged["pais_code"] = REPORTER
+    df_merged["socio"] = df_merged["socio_code"].map(SOCIOS_NOMBRES)
+    df_merged["moneda_original"] = "USD"
 
     # Reordenar
-    cols = ['fecha', 'pais', 'pais_code', 'socio', 'socio_code',
-            'exportaciones', 'importaciones', 'moneda_original']
+    cols = [
+        "fecha",
+        "pais",
+        "pais_code",
+        "socio",
+        "socio_code",
+        "exportaciones",
+        "importaciones",
+        "moneda_original",
+    ]
     df_new = df_merged[[c for c in cols if c in df_merged.columns]]
 
     # Combinar con datos existentes si es incremental
     if existing_df is not None and not df_new.empty:
         df_final = pd.concat([existing_df, df_new], ignore_index=True)
-        df_final = df_final.drop_duplicates(subset=['fecha', 'socio_code'], keep='last')
+        df_final = df_final.drop_duplicates(subset=["fecha", "socio_code"], keep="last")
         print(f"\n  Datos existentes: {len(existing_df):,} filas")
         print(f"  Datos nuevos: {len(df_new):,} filas")
     else:
         df_final = df_new
 
-    df_final = df_final.sort_values(['socio_code', 'fecha'])
+    df_final = df_final.sort_values(["socio_code", "fecha"])
 
     # Guardar
     df_final.to_csv(FILE_US_SOCIOS, index=False)
@@ -457,12 +575,17 @@ def download_us_socios(incremental=True):
 # MAIN
 # ============================================================
 
-def main(force=False):
-    """Ejecuta las descargas de datos de comercio de US.
+
+def main(force: bool = False) -> bool:
+    """Execute US trade data downloads.
 
     Args:
-        force: Si True, descarga TODO desde START_YEAR.
-               Si False (default), modo incremental - solo meses nuevos.
+        force: If True, downloads ALL data from START_YEAR (full refresh).
+               If False (default), incremental mode - only downloads new months.
+
+    Returns:
+        True if bienes data was successfully generated, False otherwise.
+        Returns False immediately if CENSUS_API_KEY is not configured.
     """
     incremental = not force
 
@@ -489,9 +612,9 @@ def main(force=False):
     df_socios = download_us_socios(incremental=incremental)
 
     # Resumen
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print("RESUMEN US")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
     for f in [FILE_US_BIENES, FILE_US_SOCIOS]:
         if f.exists():
             size_kb = f.stat().st_size / 1024
@@ -503,8 +626,8 @@ def main(force=False):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='ETL US Census Bureau')
-    parser.add_argument('--force', action='store_true', help='Forzar descarga')
+    parser = argparse.ArgumentParser(description="ETL US Census Bureau")
+    parser.add_argument("--force", action="store_true", help="Forzar descarga")
     args = parser.parse_args()
 
     if args.force:

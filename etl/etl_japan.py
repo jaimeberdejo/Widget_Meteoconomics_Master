@@ -25,12 +25,12 @@ import os
 # ============================================================
 
 # Reporter
-REPORTER = 'JP'
-REPORTER_NOMBRE = 'Japón'
+REPORTER = "JP"
+REPORTER_NOMBRE = "Japón"
 
 # e-Stat API
 # Requiere API key gratuita: https://www.e-stat.go.jp/api/
-ESTAT_API_KEY = os.environ.get('ESTAT_API_KEY', '')
+ESTAT_API_KEY = os.environ.get("ESTAT_API_KEY", "")
 ESTAT_BASE_URL = "https://api.e-stat.go.jp/rest/3.0/app/json/getStatsData"
 
 # Japan Customs historical data (descarga directa)
@@ -38,70 +38,163 @@ CUSTOMS_BASE_URL = "https://www.customs.go.jp/toukei/suii"
 
 # Mapeo HS 2-dígitos a SITC 1-dígito
 HS_TO_SITC = {
-    '01': '0', '02': '0', '03': '0', '04': '0', '05': '0',
-    '06': '0', '07': '0', '08': '0', '09': '0', '10': '0',
-    '11': '0', '12': '0', '13': '0', '14': '0',
-    '15': '4',
-    '16': '0', '17': '0', '18': '0', '19': '0', '20': '0', '21': '0',
-    '22': '1',
-    '23': '0',
-    '24': '1',
-    '25': '2', '26': '2', '27': '3',
-    '28': '5', '29': '5', '30': '5', '31': '5', '32': '5',
-    '33': '5', '34': '5', '35': '5', '36': '5', '37': '5', '38': '5',
-    '39': '5', '40': '6',
-    '41': '6', '42': '8', '43': '8',
-    '44': '6', '45': '6', '46': '6',
-    '47': '6', '48': '6', '49': '8',
-    '50': '6', '51': '6', '52': '6', '53': '6', '54': '6', '55': '6',
-    '56': '6', '57': '6', '58': '6', '59': '6', '60': '6',
-    '61': '8', '62': '8', '63': '8',
-    '64': '8', '65': '8', '66': '8', '67': '8',
-    '68': '6', '69': '6', '70': '6',
-    '71': '6',
-    '72': '6', '73': '6',
-    '74': '6', '75': '6', '76': '6', '78': '6', '79': '6',
-    '80': '6', '81': '6', '82': '6', '83': '6',
-    '84': '7',
-    '85': '7',
-    '86': '7', '87': '7', '88': '7', '89': '7',
-    '90': '8',
-    '91': '8', '92': '8',
-    '93': '9',
-    '94': '8', '95': '8', '96': '8',
-    '97': '9', '98': '9', '99': '9',
+    "01": "0",
+    "02": "0",
+    "03": "0",
+    "04": "0",
+    "05": "0",
+    "06": "0",
+    "07": "0",
+    "08": "0",
+    "09": "0",
+    "10": "0",
+    "11": "0",
+    "12": "0",
+    "13": "0",
+    "14": "0",
+    "15": "4",
+    "16": "0",
+    "17": "0",
+    "18": "0",
+    "19": "0",
+    "20": "0",
+    "21": "0",
+    "22": "1",
+    "23": "0",
+    "24": "1",
+    "25": "2",
+    "26": "2",
+    "27": "3",
+    "28": "5",
+    "29": "5",
+    "30": "5",
+    "31": "5",
+    "32": "5",
+    "33": "5",
+    "34": "5",
+    "35": "5",
+    "36": "5",
+    "37": "5",
+    "38": "5",
+    "39": "5",
+    "40": "6",
+    "41": "6",
+    "42": "8",
+    "43": "8",
+    "44": "6",
+    "45": "6",
+    "46": "6",
+    "47": "6",
+    "48": "6",
+    "49": "8",
+    "50": "6",
+    "51": "6",
+    "52": "6",
+    "53": "6",
+    "54": "6",
+    "55": "6",
+    "56": "6",
+    "57": "6",
+    "58": "6",
+    "59": "6",
+    "60": "6",
+    "61": "8",
+    "62": "8",
+    "63": "8",
+    "64": "8",
+    "65": "8",
+    "66": "8",
+    "67": "8",
+    "68": "6",
+    "69": "6",
+    "70": "6",
+    "71": "6",
+    "72": "6",
+    "73": "6",
+    "74": "6",
+    "75": "6",
+    "76": "6",
+    "78": "6",
+    "79": "6",
+    "80": "6",
+    "81": "6",
+    "82": "6",
+    "83": "6",
+    "84": "7",
+    "85": "7",
+    "86": "7",
+    "87": "7",
+    "88": "7",
+    "89": "7",
+    "90": "8",
+    "91": "8",
+    "92": "8",
+    "93": "9",
+    "94": "8",
+    "95": "8",
+    "96": "8",
+    "97": "9",
+    "98": "9",
+    "99": "9",
 }
 
 # Sectores SITC
 SECTORES_SITC = {
-    '0': 'Alimentos y animales vivos',
-    '1': 'Bebidas y tabaco',
-    '2': 'Materiales crudos',
-    '3': 'Combustibles minerales',
-    '4': 'Aceites y grasas',
-    '5': 'Productos químicos',
-    '6': 'Manufacturas por material',
-    '7': 'Maquinaria y transporte',
-    '8': 'Manufacturas diversas',
-    '9': 'Otros',
-    'TOTAL': 'Total Comercio',
+    "0": "Alimentos y animales vivos",
+    "1": "Bebidas y tabaco",
+    "2": "Materiales crudos",
+    "3": "Combustibles minerales",
+    "4": "Aceites y grasas",
+    "5": "Productos químicos",
+    "6": "Manufacturas por material",
+    "7": "Maquinaria y transporte",
+    "8": "Manufacturas diversas",
+    "9": "Otros",
+    "TOTAL": "Total Comercio",
 }
 
 # Partners principales
 PARTNERS = [
-    'AT', 'AU', 'BE', 'BR', 'CA', 'CH', 'CL', 'CN', 'CZ', 'DE',
-    'ES', 'FR', 'GB', 'IE', 'IN', 'IT', 'KR', 'MX', 'NL',
-    'NO', 'PL', 'PT', 'RU', 'SA', 'SE', 'SG', 'TW', 'UA', 'US', 'VN',
+    "AT",
+    "AU",
+    "BE",
+    "BR",
+    "CA",
+    "CH",
+    "CL",
+    "CN",
+    "CZ",
+    "DE",
+    "ES",
+    "FR",
+    "GB",
+    "IE",
+    "IN",
+    "IT",
+    "KR",
+    "MX",
+    "NL",
+    "NO",
+    "PL",
+    "PT",
+    "RU",
+    "SA",
+    "SE",
+    "SG",
+    "TW",
+    "UA",
+    "US",
+    "VN",
 ]
 
 # Archivos de salida
-DATA_DIR = Path(__file__).parent.parent / 'data' / 'jp'
-FILE_JP_BIENES = DATA_DIR / 'bienes_agregado.csv'
-FILE_JP_SOCIOS = DATA_DIR / 'comercio_socios.csv'
+DATA_DIR = Path(__file__).parent.parent / "data" / "jp"
+FILE_JP_BIENES = DATA_DIR / "bienes_agregado.csv"
+FILE_JP_SOCIOS = DATA_DIR / "comercio_socios.csv"
 
 HTTP_HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-    'Accept': 'application/json',
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Accept": "application/json",
 }
 
 CURRENT_YEAR = datetime.now().year
@@ -112,16 +205,28 @@ START_YEAR = 2013
 # FUNCIONES AUXILIARES
 # ============================================================
 
-def _download_json(url, description, timeout=120):
-    """Descarga datos JSON."""
-    print(f"\n{'='*70}")
+
+def _download_json(url: str, description: str, timeout: int = 120) -> dict:
+    """Download JSON data from e-Stat or Japan Customs API.
+
+    Args:
+        url: API endpoint URL.
+        description: Human-readable description for logging.
+        timeout: Request timeout in seconds.
+
+    Returns:
+        Parsed JSON as dict, or None if request fails or JSON decode fails.
+    """
+    print(f"\n{'=' * 70}")
     print(f"  {description}")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
     print(f"  URL: {url[:100]}...")
 
     try:
         response = requests.get(url, headers=HTTP_HEADERS, timeout=timeout)
-        print(f"  Status: {response.status_code} | Size: {len(response.content):,} bytes")
+        print(
+            f"  Status: {response.status_code} | Size: {len(response.content):,} bytes"
+        )
 
         if response.status_code == 200:
             try:
@@ -141,51 +246,62 @@ def _download_json(url, description, timeout=120):
 # DESCARGA DE DATOS JAPÓN
 # ============================================================
 
-def download_japan_bienes_agregado():
+
+def download_japan_bienes_agregado() -> pd.DataFrame:
+    """Download Japan trade data aggregated by sector.
+
+    Attempts to download from e-Stat API if ESTAT_API_KEY is configured.
+    Falls back to generating sample data if API is unavailable.
+
+    Returns:
+        DataFrame with trade data in JPY by SITC sector.
     """
-    Descarga datos de comercio Japón por sector.
-    """
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("DESCARGANDO BIENES AGREGADOS JAPÓN")
-    print("="*70)
+    print("=" * 70)
 
     if ESTAT_API_KEY:
         # Intentar e-Stat API
         params = {
-            'appId': ESTAT_API_KEY,
-            'statsDataId': '0003348423',  # Trade Statistics of Japan
-            'lang': 'E',
+            "appId": ESTAT_API_KEY,
+            "statsDataId": "0003348423",  # Trade Statistics of Japan
+            "lang": "E",
         }
         url = f"{ESTAT_BASE_URL}?" + "&".join(f"{k}={v}" for k, v in params.items())
         data = _download_json(url, "e-Stat API Japan Trade")
 
-        if data and 'GET_STATS_DATA' in data:
+        if data and "GET_STATS_DATA" in data:
             return process_estat_data(data)
 
     print("\n  API no disponible. Generando datos de ejemplo...")
     return generate_japan_sample_data()
 
 
-def generate_japan_sample_data():
-    """
-    Genera datos de ejemplo para Japón basados en estadísticas públicas.
-    Fuente: Japan Customs Trade Statistics
+def generate_japan_sample_data() -> pd.DataFrame:
+    """Generate sample trade data for Japan based on public statistics.
+
+    Creates synthetic monthly trade data from START_YEAR to present, using
+    approximate 2023 values from Japan Customs Trade Statistics with year/seasonal
+    adjustments.
+
+    Returns:
+        DataFrame with trade data in JPY, saved to FILE_JP_BIENES.
     """
     print("  Generando datos de ejemplo Japón...")
 
     # Valores aproximados 2023 (billones JPY)
     # Fuente: Ministry of Finance Japan
     jp_trade_2023 = {
-        '0': {'exp': 1.0, 'imp': 10.0},    # Alimentos (Japón importa mucho)
-        '1': {'exp': 0.2, 'imp': 0.8},     # Bebidas/tabaco
-        '2': {'exp': 0.5, 'imp': 5.0},     # Materiales crudos
-        '3': {'exp': 1.0, 'imp': 30.0},    # Combustibles (gran importador)
-        '4': {'exp': 0.1, 'imp': 0.3},     # Aceites
-        '5': {'exp': 12.0, 'imp': 10.0},   # Químicos
-        '6': {'exp': 8.0, 'imp': 7.0},     # Manufacturas
-        '7': {'exp': 60.0, 'imp': 25.0},   # Maquinaria/transporte (gran exportador)
-        '8': {'exp': 5.0, 'imp': 10.0},    # Manufacturas diversas
-        '9': {'exp': 2.0, 'imp': 3.0},     # Otros
+        "0": {"exp": 1.0, "imp": 10.0},  # Alimentos (Japón importa mucho)
+        "1": {"exp": 0.2, "imp": 0.8},  # Bebidas/tabaco
+        "2": {"exp": 0.5, "imp": 5.0},  # Materiales crudos
+        "3": {"exp": 1.0, "imp": 30.0},  # Combustibles (gran importador)
+        "4": {"exp": 0.1, "imp": 0.3},  # Aceites
+        "5": {"exp": 12.0, "imp": 10.0},  # Químicos
+        "6": {"exp": 8.0, "imp": 7.0},  # Manufacturas
+        "7": {"exp": 60.0, "imp": 25.0},  # Maquinaria/transporte (gran exportador)
+        "8": {"exp": 5.0, "imp": 10.0},  # Manufacturas diversas
+        "9": {"exp": 2.0, "imp": 3.0},  # Otros
     }
 
     data = []
@@ -201,42 +317,58 @@ def generate_japan_sample_data():
 
             for sector, values in jp_trade_2023.items():
                 # Convertir billones JPY a JPY
-                exp_val = values['exp'] * 1e12 / 12 * year_factor * seasonal
-                imp_val = values['imp'] * 1e12 / 12 * year_factor * seasonal
+                exp_val = values["exp"] * 1e12 / 12 * year_factor * seasonal
+                imp_val = values["imp"] * 1e12 / 12 * year_factor * seasonal
 
-                data.append({
-                    'fecha': fecha,
-                    'pais': REPORTER_NOMBRE,
-                    'pais_code': REPORTER,
-                    'sector': SECTORES_SITC[sector],
-                    'sector_code': sector,
-                    'exportaciones': exp_val,
-                    'importaciones': imp_val,
-                    'balance': exp_val - imp_val,
-                    'moneda_original': 'JPY',
-                    'exportaciones_orig': exp_val,
-                    'importaciones_orig': imp_val,
-                })
+                data.append(
+                    {
+                        "fecha": fecha,
+                        "pais": REPORTER_NOMBRE,
+                        "pais_code": REPORTER,
+                        "sector": SECTORES_SITC[sector],
+                        "sector_code": sector,
+                        "exportaciones": exp_val,
+                        "importaciones": imp_val,
+                        "balance": exp_val - imp_val,
+                        "moneda_original": "JPY",
+                        "exportaciones_orig": exp_val,
+                        "importaciones_orig": imp_val,
+                    }
+                )
 
             # TOTAL
-            total_exp = sum(v['exp'] for v in jp_trade_2023.values()) * 1e12 / 12 * year_factor * seasonal
-            total_imp = sum(v['imp'] for v in jp_trade_2023.values()) * 1e12 / 12 * year_factor * seasonal
-            data.append({
-                'fecha': fecha,
-                'pais': REPORTER_NOMBRE,
-                'pais_code': REPORTER,
-                'sector': SECTORES_SITC['TOTAL'],
-                'sector_code': 'TOTAL',
-                'exportaciones': total_exp,
-                'importaciones': total_imp,
-                'balance': total_exp - total_imp,
-                'moneda_original': 'JPY',
-                'exportaciones_orig': total_exp,
-                'importaciones_orig': total_imp,
-            })
+            total_exp = (
+                sum(v["exp"] for v in jp_trade_2023.values())
+                * 1e12
+                / 12
+                * year_factor
+                * seasonal
+            )
+            total_imp = (
+                sum(v["imp"] for v in jp_trade_2023.values())
+                * 1e12
+                / 12
+                * year_factor
+                * seasonal
+            )
+            data.append(
+                {
+                    "fecha": fecha,
+                    "pais": REPORTER_NOMBRE,
+                    "pais_code": REPORTER,
+                    "sector": SECTORES_SITC["TOTAL"],
+                    "sector_code": "TOTAL",
+                    "exportaciones": total_exp,
+                    "importaciones": total_imp,
+                    "balance": total_exp - total_imp,
+                    "moneda_original": "JPY",
+                    "exportaciones_orig": total_exp,
+                    "importaciones_orig": total_imp,
+                }
+            )
 
     df = pd.DataFrame(data)
-    df = df.sort_values(['sector_code', 'fecha'])
+    df = df.sort_values(["sector_code", "fecha"])
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     df.to_csv(FILE_JP_BIENES, index=False)
@@ -245,66 +377,94 @@ def generate_japan_sample_data():
     return df
 
 
-def download_japan_socios():
+def download_japan_socios() -> pd.DataFrame:
+    """Download Japan bilateral trade data with major partners.
+
+    Returns:
+        DataFrame with bilateral trade flows between Japan and partner countries.
     """
-    Descarga comercio bilateral Japón con socios principales.
-    """
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("DESCARGANDO COMERCIO BILATERAL JAPÓN")
-    print("="*70)
+    print("=" * 70)
 
     print("  Generando datos de socios Japón...")
     return generate_japan_partners_data()
 
 
-def generate_japan_partners_data():
-    """
-    Genera datos de comercio bilateral Japón.
-    Basado en estadísticas de Japan Customs.
+def generate_japan_partners_data() -> pd.DataFrame:
+    """Generate sample bilateral trade data for Japan.
+
+    Creates synthetic monthly bilateral trade data with major partners,
+    based on Japan Customs statistics.
+
+    Returns:
+        DataFrame with bilateral trade data in JPY, saved to FILE_JP_SOCIOS.
     """
     # Top socios Japón 2023 (billones JPY)
     jp_partners_2023 = {
-        'CN': {'exp': 18.0, 'imp': 25.0},   # China - mayor socio
-        'US': {'exp': 17.0, 'imp': 11.0},   # EE.UU. - superávit
-        'KR': {'exp': 6.0, 'imp': 4.0},
-        'TW': {'exp': 6.0, 'imp': 3.5},
-        'AU': {'exp': 2.0, 'imp': 12.0},    # Recursos naturales
-        'DE': {'exp': 2.5, 'imp': 3.0},
-        'SA': {'exp': 1.0, 'imp': 6.0},     # Petróleo
-        'VN': {'exp': 2.5, 'imp': 3.0},
-        'SG': {'exp': 3.0, 'imp': 1.5},
-        'IN': {'exp': 2.0, 'imp': 1.0},
-        'NL': {'exp': 2.0, 'imp': 0.8},
-        'GB': {'exp': 1.5, 'imp': 1.2},
-        'FR': {'exp': 1.0, 'imp': 1.5},
-        'IT': {'exp': 0.8, 'imp': 1.2},
-        'ES': {'exp': 0.5, 'imp': 0.6},
-        'CA': {'exp': 1.2, 'imp': 2.0},
-        'MX': {'exp': 1.5, 'imp': 0.8},
-        'BR': {'exp': 0.5, 'imp': 1.5},
-        'RU': {'exp': 0.8, 'imp': 2.5},     # Energía
-        'CH': {'exp': 1.0, 'imp': 1.5},
-        'BE': {'exp': 0.6, 'imp': 0.8},
-        'AT': {'exp': 0.2, 'imp': 0.3},
-        'PL': {'exp': 0.3, 'imp': 0.2},
-        'CZ': {'exp': 0.2, 'imp': 0.2},
-        'PT': {'exp': 0.1, 'imp': 0.1},
-        'SE': {'exp': 0.3, 'imp': 0.4},
-        'NO': {'exp': 0.2, 'imp': 0.8},
-        'IE': {'exp': 0.3, 'imp': 0.5},
-        'CL': {'exp': 0.2, 'imp': 1.0},     # Cobre
-        'UA': {'exp': 0.1, 'imp': 0.1},
+        "CN": {"exp": 18.0, "imp": 25.0},  # China - mayor socio
+        "US": {"exp": 17.0, "imp": 11.0},  # EE.UU. - superávit
+        "KR": {"exp": 6.0, "imp": 4.0},
+        "TW": {"exp": 6.0, "imp": 3.5},
+        "AU": {"exp": 2.0, "imp": 12.0},  # Recursos naturales
+        "DE": {"exp": 2.5, "imp": 3.0},
+        "SA": {"exp": 1.0, "imp": 6.0},  # Petróleo
+        "VN": {"exp": 2.5, "imp": 3.0},
+        "SG": {"exp": 3.0, "imp": 1.5},
+        "IN": {"exp": 2.0, "imp": 1.0},
+        "NL": {"exp": 2.0, "imp": 0.8},
+        "GB": {"exp": 1.5, "imp": 1.2},
+        "FR": {"exp": 1.0, "imp": 1.5},
+        "IT": {"exp": 0.8, "imp": 1.2},
+        "ES": {"exp": 0.5, "imp": 0.6},
+        "CA": {"exp": 1.2, "imp": 2.0},
+        "MX": {"exp": 1.5, "imp": 0.8},
+        "BR": {"exp": 0.5, "imp": 1.5},
+        "RU": {"exp": 0.8, "imp": 2.5},  # Energía
+        "CH": {"exp": 1.0, "imp": 1.5},
+        "BE": {"exp": 0.6, "imp": 0.8},
+        "AT": {"exp": 0.2, "imp": 0.3},
+        "PL": {"exp": 0.3, "imp": 0.2},
+        "CZ": {"exp": 0.2, "imp": 0.2},
+        "PT": {"exp": 0.1, "imp": 0.1},
+        "SE": {"exp": 0.3, "imp": 0.4},
+        "NO": {"exp": 0.2, "imp": 0.8},
+        "IE": {"exp": 0.3, "imp": 0.5},
+        "CL": {"exp": 0.2, "imp": 1.0},  # Cobre
+        "UA": {"exp": 0.1, "imp": 0.1},
     }
 
     SOCIOS_NOMBRES = {
-        'AT': 'Austria', 'AU': 'Australia', 'BE': 'Belgica', 'BR': 'Brasil',
-        'CA': 'Canada', 'CH': 'Suiza', 'CL': 'Chile', 'CN': 'China',
-        'CZ': 'Republica Checa', 'DE': 'Alemania', 'ES': 'Espana',
-        'FR': 'Francia', 'GB': 'Reino Unido', 'IE': 'Irlanda', 'IN': 'India',
-        'IT': 'Italia', 'KR': 'Corea del Sur', 'MX': 'Mexico',
-        'NL': 'Paises Bajos', 'NO': 'Noruega', 'PL': 'Polonia', 'PT': 'Portugal',
-        'RU': 'Rusia', 'SA': 'Arabia Saudita', 'SE': 'Suecia', 'SG': 'Singapur',
-        'TW': 'Taiwan', 'UA': 'Ucrania', 'US': 'Estados Unidos', 'VN': 'Vietnam',
+        "AT": "Austria",
+        "AU": "Australia",
+        "BE": "Belgica",
+        "BR": "Brasil",
+        "CA": "Canada",
+        "CH": "Suiza",
+        "CL": "Chile",
+        "CN": "China",
+        "CZ": "Republica Checa",
+        "DE": "Alemania",
+        "ES": "Espana",
+        "FR": "Francia",
+        "GB": "Reino Unido",
+        "IE": "Irlanda",
+        "IN": "India",
+        "IT": "Italia",
+        "KR": "Corea del Sur",
+        "MX": "Mexico",
+        "NL": "Paises Bajos",
+        "NO": "Noruega",
+        "PL": "Polonia",
+        "PT": "Portugal",
+        "RU": "Rusia",
+        "SA": "Arabia Saudita",
+        "SE": "Suecia",
+        "SG": "Singapur",
+        "TW": "Taiwan",
+        "UA": "Ucrania",
+        "US": "Estados Unidos",
+        "VN": "Vietnam",
     }
 
     data = []
@@ -322,24 +482,26 @@ def generate_japan_partners_data():
                 if partner not in PARTNERS:
                     continue
 
-                exp_val = values['exp'] * 1e12 / 12 * year_factor * seasonal
-                imp_val = values['imp'] * 1e12 / 12 * year_factor * seasonal
+                exp_val = values["exp"] * 1e12 / 12 * year_factor * seasonal
+                imp_val = values["imp"] * 1e12 / 12 * year_factor * seasonal
 
-                data.append({
-                    'fecha': fecha,
-                    'pais': REPORTER_NOMBRE,
-                    'pais_code': REPORTER,
-                    'socio': SOCIOS_NOMBRES.get(partner, partner),
-                    'socio_code': partner,
-                    'exportaciones': exp_val,
-                    'importaciones': imp_val,
-                    'moneda_original': 'JPY',
-                    'exportaciones_orig': exp_val,
-                    'importaciones_orig': imp_val,
-                })
+                data.append(
+                    {
+                        "fecha": fecha,
+                        "pais": REPORTER_NOMBRE,
+                        "pais_code": REPORTER,
+                        "socio": SOCIOS_NOMBRES.get(partner, partner),
+                        "socio_code": partner,
+                        "exportaciones": exp_val,
+                        "importaciones": imp_val,
+                        "moneda_original": "JPY",
+                        "exportaciones_orig": exp_val,
+                        "importaciones_orig": imp_val,
+                    }
+                )
 
     df = pd.DataFrame(data)
-    df = df.sort_values(['socio_code', 'fecha'])
+    df = df.sort_values(["socio_code", "fecha"])
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     df.to_csv(FILE_JP_SOCIOS, index=False)
@@ -348,8 +510,15 @@ def generate_japan_partners_data():
     return df
 
 
-def process_estat_data(data):
-    """Procesa datos de e-Stat API."""
+def process_estat_data(data: dict) -> pd.DataFrame:
+    """Process raw e-Stat API response.
+
+    Args:
+        data: Raw JSON response from e-Stat API.
+
+    Returns:
+        Processed DataFrame, or None when API implementation is available.
+    """
     # Implementación cuando API esté configurada
     pass
 
@@ -358,8 +527,16 @@ def process_estat_data(data):
 # MAIN
 # ============================================================
 
-def main(force=False):
-    """Ejecuta las descargas de datos de comercio Japón."""
+
+def main(force: bool = False) -> bool:
+    """Execute Japan trade data download and processing.
+
+    Args:
+        force: If True, delete existing cache files before downloading.
+
+    Returns:
+        True if bienes data was successfully generated, False otherwise.
+    """
     print("=" * 70)
     print("ETL JAPÓN e-STAT - COMERCIO INTERNACIONAL")
     print(f"Reporter: {REPORTER} ({REPORTER_NOMBRE})")
@@ -377,9 +554,9 @@ def main(force=False):
     df_bienes = download_japan_bienes_agregado()
     df_socios = download_japan_socios()
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print("RESUMEN JAPÓN")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
     for f in [FILE_JP_BIENES, FILE_JP_SOCIOS]:
         if f.exists():
             size_kb = f.stat().st_size / 1024
@@ -391,8 +568,8 @@ def main(force=False):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='ETL Japan e-Stat')
-    parser.add_argument('--force', action='store_true', help='Forzar descarga')
+    parser = argparse.ArgumentParser(description="ETL Japan e-Stat")
+    parser.add_argument("--force", action="store_true", help="Forzar descarga")
     args = parser.parse_args()
 
     if args.force:
