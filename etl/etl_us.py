@@ -159,13 +159,27 @@ def _api_to_dataframe(data):
 # DESCARGA: Bienes agregados por sector SITC
 # ============================================================
 
-def download_us_bienes_agregado():
+def _get_last_date_from_file(file_path):
+    """Obtiene la última fecha de un archivo CSV existente."""
+    if not file_path.exists():
+        return None
+    try:
+        df = pd.read_csv(file_path)
+        df['fecha'] = pd.to_datetime(df['fecha'])
+        return df['fecha'].max()
+    except Exception:
+        return None
+
+
+def download_us_bienes_agregado(incremental=True):
     """
     Descarga exportaciones e importaciones de US por sector SITC.
     - Exportaciones: ALL_VAL_MO
     - Importaciones: GEN_VAL_MO
     - SITC="-" indica TOTAL
     - Agrega por primer dígito SITC
+
+    Si incremental=True, solo descarga meses nuevos desde la última fecha existente.
     """
     print("\n" + "="*70)
     print("DESCARGANDO BIENES AGREGADOS US (SITC)")
@@ -177,14 +191,36 @@ def download_us_bienes_agregado():
         print("  Configurar: export CENSUS_API_KEY='tu_key'")
         return None
 
+    # Determinar desde qué fecha descargar
+    start_year = START_YEAR
+    start_month = 1
+    existing_df = None
+
+    if incremental:
+        last_date = _get_last_date_from_file(FILE_US_BIENES)
+        if last_date:
+            # Empezar desde el mes siguiente al último
+            start_year = last_date.year
+            start_month = last_date.month + 1
+            if start_month > 12:
+                start_month = 1
+                start_year += 1
+            print(f"  Modo incremental: descargando desde {start_year}-{start_month:02d}")
+            print(f"  (Última fecha existente: {last_date.strftime('%Y-%m')})")
+            existing_df = pd.read_csv(FILE_US_BIENES)
+            existing_df['fecha'] = pd.to_datetime(existing_df['fecha'])
+        else:
+            print(f"  No hay datos existentes, descargando todo desde {START_YEAR}")
+
     all_exports = []
     all_imports = []
 
     # Descargar por año-mes
-    for year in range(START_YEAR, CURRENT_YEAR + 1):
+    for year in range(start_year, CURRENT_YEAR + 1):
+        first_month = start_month if year == start_year else 1
         max_month = CURRENT_MONTH if year == CURRENT_YEAR else 12
 
-        for month in range(1, max_month + 1):
+        for month in range(first_month, max_month + 1):
             time_period = f"{year}-{month:02d}"
 
             # --- EXPORTACIONES ---
@@ -246,13 +282,23 @@ def download_us_bienes_agregado():
     # Reordenar
     cols = ['fecha', 'pais', 'pais_code', 'sector', 'sector_code',
             'exportaciones', 'importaciones', 'balance', 'moneda_original']
-    df_final = df_merged[[c for c in cols if c in df_merged.columns]]
+    df_new = df_merged[[c for c in cols if c in df_merged.columns]]
+
+    # Combinar con datos existentes si es incremental
+    if existing_df is not None and not df_new.empty:
+        df_final = pd.concat([existing_df, df_new], ignore_index=True)
+        df_final = df_final.drop_duplicates(subset=['fecha', 'sector_code'], keep='last')
+        print(f"\n  Datos existentes: {len(existing_df):,} filas")
+        print(f"  Datos nuevos: {len(df_new):,} filas")
+    else:
+        df_final = df_new
+
     df_final = df_final.sort_values(['sector_code', 'fecha'])
 
     # Guardar
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     df_final.to_csv(FILE_US_BIENES, index=False)
-    print(f"\n  Guardado: {FILE_US_BIENES} ({len(df_final):,} filas)")
+    print(f"  Total guardado: {FILE_US_BIENES} ({len(df_final):,} filas)")
 
     return df_final
 
@@ -287,10 +333,12 @@ def _process_sitc_data(df, flow_name):
 # DESCARGA: Comercio bilateral con socios
 # ============================================================
 
-def download_us_socios():
+def download_us_socios(incremental=True):
     """
     Descarga comercio bilateral de US con principales socios.
     Solo TOTAL (sin desglose por SITC) para simplificar.
+
+    Si incremental=True, solo descarga meses nuevos desde la última fecha existente.
     """
     print("\n" + "="*70)
     print("DESCARGANDO COMERCIO BILATERAL US")
@@ -300,13 +348,31 @@ def download_us_socios():
         print("  ERROR: Se requiere CENSUS_API_KEY")
         return None
 
+    # Determinar desde qué fecha descargar
+    start_year = START_YEAR
+    start_month = 1
+    existing_df = None
+
+    if incremental:
+        last_date = _get_last_date_from_file(FILE_US_SOCIOS)
+        if last_date:
+            start_year = last_date.year
+            start_month = last_date.month + 1
+            if start_month > 12:
+                start_month = 1
+                start_year += 1
+            print(f"  Modo incremental: descargando desde {start_year}-{start_month:02d}")
+            existing_df = pd.read_csv(FILE_US_SOCIOS)
+            existing_df['fecha'] = pd.to_datetime(existing_df['fecha'])
+
     all_data = []
 
     # Por cada mes
-    for year in range(START_YEAR, CURRENT_YEAR + 1):
+    for year in range(start_year, CURRENT_YEAR + 1):
+        first_month = start_month if year == start_year else 1
         max_month = CURRENT_MONTH if year == CURRENT_YEAR else 12
 
-        for month in range(1, max_month + 1):
+        for month in range(first_month, max_month + 1):
             time_period = f"{year}-{month:02d}"
 
             # Descargar todos los países de una vez (más eficiente)
@@ -367,12 +433,22 @@ def download_us_socios():
     # Reordenar
     cols = ['fecha', 'pais', 'pais_code', 'socio', 'socio_code',
             'exportaciones', 'importaciones', 'moneda_original']
-    df_final = df_merged[[c for c in cols if c in df_merged.columns]]
+    df_new = df_merged[[c for c in cols if c in df_merged.columns]]
+
+    # Combinar con datos existentes si es incremental
+    if existing_df is not None and not df_new.empty:
+        df_final = pd.concat([existing_df, df_new], ignore_index=True)
+        df_final = df_final.drop_duplicates(subset=['fecha', 'socio_code'], keep='last')
+        print(f"\n  Datos existentes: {len(existing_df):,} filas")
+        print(f"  Datos nuevos: {len(df_new):,} filas")
+    else:
+        df_final = df_new
+
     df_final = df_final.sort_values(['socio_code', 'fecha'])
 
     # Guardar
     df_final.to_csv(FILE_US_SOCIOS, index=False)
-    print(f"\n  Guardado: {FILE_US_SOCIOS} ({len(df_final):,} filas)")
+    print(f"  Total guardado: {FILE_US_SOCIOS} ({len(df_final):,} filas)")
 
     return df_final
 
@@ -382,11 +458,18 @@ def download_us_socios():
 # ============================================================
 
 def main(force=False):
-    """Ejecuta las descargas de datos de comercio de US."""
+    """Ejecuta las descargas de datos de comercio de US.
+
+    Args:
+        force: Si True, descarga TODO desde START_YEAR.
+               Si False (default), modo incremental - solo meses nuevos.
+    """
+    incremental = not force
+
     print("=" * 70)
     print("ETL US CENSUS BUREAU - COMERCIO INTERNACIONAL")
     print(f"Reporter: {REPORTER} ({REPORTER_NOMBRE})")
-    print(f"Periodo: {START_YEAR}-01 a {CURRENT_YEAR}-{CURRENT_MONTH:02d}")
+    print(f"Modo: {'COMPLETO (force)' if force else 'INCREMENTAL'}")
     print(f"API Key: {'Configurada' if CENSUS_API_KEY else 'NO CONFIGURADA'}")
     print("=" * 70)
 
@@ -400,10 +483,10 @@ def main(force=False):
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     # Descargar bienes agregados
-    df_bienes = download_us_bienes_agregado()
+    df_bienes = download_us_bienes_agregado(incremental=incremental)
 
     # Descargar comercio bilateral
-    df_socios = download_us_socios()
+    df_socios = download_us_socios(incremental=incremental)
 
     # Resumen
     print(f"\n{'='*70}")
