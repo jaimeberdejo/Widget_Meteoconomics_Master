@@ -1,172 +1,184 @@
-# 🌍 Widget Meteoconomics - Balanza Comercial
+# Widget Meteoconomics - Balanza Comercial
 
-Dashboard interactivo de análisis de la balanza comercial de bienes para Alemania, España, Francia e Italia, utilizando datos oficiales de Eurostat.
+Dashboard interactivo de comercio internacional con datos de Eurostat (UE) y US Census Bureau (Estados Unidos).
 
-## 📊 Características
+## Datos Disponibles
 
-- **KPIs principales**: Exportaciones, Importaciones, Balance Comercial y Tasa de Cobertura
-- **Evolución temporal**: Gráfico mensual de flujos comerciales y balance
-- **Análisis sectorial**: Sunbursts interactivos de importaciones y exportaciones por sector SITC
-- **Socios comerciales**: Bump chart con ranking evolutivo de los top 10 socios comerciales
-- **Datos reales**: Actualización directa desde la API oficial de Eurostat
+| Pais | Fuente | Periodo | Estado |
+|------|--------|---------|--------|
+| Alemania (DE) | Eurostat | 2002-2025 | Completo |
+| Espana (ES) | Eurostat | 2002-2025 | Completo |
+| Francia (FR) | Eurostat | 2002-2025 | Completo |
+| Italia (IT) | Eurostat | 2002-2025 | Completo |
+| Estados Unidos (US) | Census Bureau | 2010-2025 | Completo |
+| Reino Unido (GB) | HMRC | - | Pendiente |
+| Japon (JP) | e-Stat | - | Pendiente |
+| Canada (CA) | StatCan | - | Pendiente |
 
-## 🗂️ Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 Widget_Meteoconomics_Master/
-├── data/
-│   ├── bienes_agregado.csv      # Comercio por sectores SITC (0.9 MB)
-│   └── comercio_socios.csv      # Comercio bilateral con 31 socios (1.7 MB)
-├── .streamlit/
-│   └── config.toml              # Configuración de Streamlit
-├── etl_data.py                  # ETL principal - Descarga datos de Eurostat
-├── update_all_data.py           # Script maestro de actualización
 ├── widget_meteoconomics.py      # Dashboard Streamlit
-├── requirements.txt             # Dependencias Python
-└── README.md
+├── update_all_data.py           # Orquestador de ETLs
+├── requirements.txt
+├── etl/                         # Scripts de extraccion de datos
+│   ├── etl_data.py             # Eurostat (DE, ES, FR, IT)
+│   ├── etl_us.py               # US Census Bureau
+│   ├── etl_uk.py               # UK HMRC (pendiente)
+│   ├── etl_japan.py            # Japan e-Stat (pendiente)
+│   ├── etl_canada.py           # Canada StatCan (pendiente)
+│   ├── etl_currency.py         # Tasas de cambio ECB
+│   └── etl_integrator.py       # Integrador de fuentes
+└── data/                        # Datos por pais
+    ├── eu/                      # Eurostat (12,595 filas)
+    │   ├── bienes_agregado.csv
+    │   └── comercio_socios.csv
+    ├── us/                      # Census Bureau (2,101 filas)
+    │   ├── bienes_agregado.csv
+    │   └── comercio_socios.csv
+    ├── uk/                      # (vacio)
+    ├── jp/                      # (vacio)
+    ├── ca/                      # (vacio)
+    └── exchange_rates.csv       # Tasas EUR/USD/GBP/JPY/CAD
 ```
 
-## 🚀 Instalación
+## Instalacion
 
-### Requisitos
-- Python 3.9+
-- pip
-
-### Pasos
-
-1. **Clonar el repositorio**
 ```bash
+# Clonar repositorio
 git clone https://github.com/jaimeberdejo/Widget_Meteoconomics_Master.git
 cd Widget_Meteoconomics_Master
-```
 
-2. **Instalar dependencias**
-```bash
+# Instalar dependencias
 pip install -r requirements.txt
-```
 
-3. **Descargar datos de Eurostat** (opcional, ya incluidos)
-```bash
-python3 etl_data.py
-```
-
-4. **Ejecutar el dashboard**
-```bash
+# Ejecutar dashboard
 streamlit run widget_meteoconomics.py
 ```
 
-El dashboard se abrirá automáticamente en `http://localhost:8501`
+## Actualizacion de Datos
 
-## 📈 Fuentes de Datos
+### Modo Incremental (recomendado)
 
-### Eurostat DS-059331 (COMEXT)
-Base de datos de comercio exterior de bienes de la Unión Europea
+Solo descarga meses nuevos desde la ultima fecha existente:
 
-**Call 1: Bienes por Sector SITC**
-- **Endpoint**: `ds-059331` (COMEXT)
+```bash
+# Actualizar datos EU (Eurostat)
+python3 etl/etl_data.py
+
+# Actualizar datos US (Census Bureau)
+export CENSUS_API_KEY='tu_api_key'
+python3 etl/etl_us.py
+```
+
+### Descarga Completa
+
+Descarga todo el historico desde el inicio:
+
+```bash
+python3 etl/etl_data.py --force
+python3 etl/etl_us.py --force
+```
+
+### Actualizar Todo
+
+```bash
+python3 update_all_data.py           # Incremental
+python3 update_all_data.py --force   # Completo
+python3 update_all_data.py --eu-only # Solo Eurostat
+```
+
+## API Keys
+
+### US Census Bureau (requerida para US)
+
+1. Registrarse gratis en: https://api.census.gov/data/key_signup.html
+2. Configurar variable de entorno:
+   ```bash
+   export CENSUS_API_KEY='tu_api_key'
+   ```
+
+### Japan e-Stat (para JP, pendiente)
+
+1. Registrarse en: https://www.e-stat.go.jp/api/
+2. Configurar:
+   ```bash
+   export ESTAT_API_KEY='tu_api_key'
+   ```
+
+## Fuentes de Datos
+
+### Eurostat DS-059331 (UE)
+
+- **Paises**: DE, ES, FR, IT
+- **Clasificacion**: SITC (Standard International Trade Classification)
+- **Moneda**: EUR
+- **Periodo**: 2002-presente
 - **Frecuencia**: Mensual
-- **Período**: 2002-01 hasta presente
-- **Reporters**: DE, ES, FR, IT
-- **Partner**: WORLD (comercio mundial agregado)
-- **Productos**: Sectores SITC 0-9 + TOTAL
-  - 0: Alimentos y animales vivos
-  - 1: Bebidas y tabaco
-  - 2: Materiales crudos
-  - 3: Combustibles minerales
-  - 4: Aceites y grasas
-  - 5: Productos químicos
-  - 6: Manufacturas por material
-  - 7: Maquinaria y transporte
-  - 8: Manufacturas diversas
-  - 9: Otros
-- **Archivo**: `data/bienes_agregado.csv`
 
-**Call 2: Bienes Bilaterales**
-- **Endpoint**: `ds-059331` (COMEXT)
+### US Census Bureau (US)
+
+- **API**: https://api.census.gov/data/timeseries/intltrade/
+- **Clasificacion**: SITC
+- **Moneda**: USD
+- **Periodo**: 2010-presente
 - **Frecuencia**: Mensual
-- **Período**: 2002-01 hasta presente
-- **Reporters**: DE, ES, FR, IT
-- **Partners**: 31 países (AT, AU, BE, BR, CA, CH, CL, CN, CZ, DE, ES, FR, GB, IE, IN, IT, JP, KR, MX, NL, NO, PL, PT, RU, SA, SE, SG, TW, UA, US, VN)
-- **Producto**: TOTAL (agregado)
-- **Archivo**: `data/comercio_socios.csv`
 
-## 🔄 Actualización de Datos
+Endpoints:
+- `/exports/sitc` - Exportaciones (variable: ALL_VAL_MO)
+- `/imports/sitc` - Importaciones (variable: GEN_VAL_MO)
 
-Los datos se actualizan automáticamente si tienen más de 7 días de antigüedad. Para forzar una actualización:
+## Estructura de Datos
 
-```bash
-# Actualización completa (elimina cache)
-python3 update_all_data.py --force
+### bienes_agregado.csv
 
-# O directamente con el ETL
-python3 etl_data.py --force
-```
+Comercio por sector SITC (10 sectores + TOTAL):
 
-## 📊 Archivos de Datos
-
-### `bienes_agregado.csv`
-Comercio de bienes desglosado por sector económico (SITC)
-
-| Columna | Descripción |
+| Columna | Descripcion |
 |---------|-------------|
-| `fecha` | Mes (YYYY-MM) |
-| `pais` | Nombre del país reporter |
-| `pais_code` | Código ISO (DE, ES, FR, IT) |
-| `sector` | Nombre del sector SITC |
-| `sector_code` | Código SITC (0-9, TOTAL) |
-| `exportaciones` | Valor en EUR |
-| `importaciones` | Valor en EUR |
-| `balance` | Exportaciones - Importaciones |
+| fecha | YYYY-MM-DD |
+| pais | Nombre del pais |
+| pais_code | Codigo ISO (DE, ES, FR, IT, US) |
+| sector | Nombre del sector |
+| sector_code | Codigo SITC (0-9, TOTAL) |
+| exportaciones | Valor en moneda original |
+| importaciones | Valor en moneda original |
+| balance | Exportaciones - Importaciones |
+| moneda_original | EUR o USD |
 
-**Tamaño**: ~0.9 MB | **Filas**: ~12,595
+### comercio_socios.csv
 
-### `comercio_socios.csv`
-Comercio bilateral de bienes con socios específicos
+Comercio bilateral con 30 socios principales:
 
-| Columna | Descripción |
+| Columna | Descripcion |
 |---------|-------------|
-| `fecha` | Mes (YYYY-MM) |
-| `pais` | Nombre del país reporter |
-| `pais_code` | Código ISO del reporter |
-| `socio` | Nombre del país socio |
-| `socio_code` | Código ISO del socio |
-| `exportaciones` | Valor total de bienes en EUR |
-| `importaciones` | Valor total de bienes en EUR |
+| fecha | YYYY-MM-DD |
+| pais | Reporter |
+| pais_code | Codigo ISO reporter |
+| socio | Partner |
+| socio_code | Codigo ISO partner |
+| exportaciones | Valor total |
+| importaciones | Valor total |
+| moneda_original | EUR o USD |
 
-**Tamaño**: ~1.7 MB | **Filas**: ~34,407
+### Sectores SITC
 
-## 🛠️ Scripts
+| Codigo | Sector |
+|--------|--------|
+| 0 | Alimentos y animales vivos |
+| 1 | Bebidas y tabaco |
+| 2 | Materiales crudos |
+| 3 | Combustibles minerales |
+| 4 | Aceites y grasas |
+| 5 | Productos quimicos |
+| 6 | Manufacturas por material |
+| 7 | Maquinaria y transporte |
+| 8 | Manufacturas diversas |
+| 9 | Otros |
+| TOTAL | Total comercio |
 
-### `etl_data.py`
-ETL principal que descarga y procesa datos de Eurostat
-
-```bash
-# Descarga normal (usa cache si es reciente)
-python3 etl_data.py
-
-# Forzar descarga (ignora cache)
-python3 etl_data.py --force
-```
-
-### `update_all_data.py`
-Script maestro para actualizar todos los datos con logging
-
-```bash
-# Actualización normal
-python3 update_all_data.py
-
-# Forzar actualización completa
-python3 update_all_data.py --force
-```
-
-### `widget_meteoconomics.py`
-Dashboard interactivo de Streamlit
-
-```bash
-streamlit run widget_meteoconomics.py
-```
-
-## 📦 Dependencias
+## Dependencias
 
 ```
 streamlit
@@ -175,9 +187,6 @@ plotly
 requests
 ```
 
-Ver `requirements.txt` para versiones específicas.
-
 ---
 
-**Meteoconomics** - Datos reales desde la API oficial de Eurostat
-
+**Meteoconomics** - Datos oficiales de Eurostat y US Census Bureau
