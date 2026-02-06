@@ -2,6 +2,8 @@
 
 Dashboard interactivo de comercio internacional con datos de Eurostat (UE) y US Census Bureau (Estados Unidos).
 
+**Demo en vivo:** https://widget-meteo.streamlit.app/
+
 ## Datos Disponibles
 
 | Pais | Fuente | Periodo | Estado |
