@@ -1,4 +1,8 @@
+# Core dependencies
 streamlit
 pandas
 plotly
-requests
+
+# HTTP clients
+requests           # Synchronous (legacy ETLs)
+aiohttp>=3.9.0     # Asynchronous (new ETLs)
