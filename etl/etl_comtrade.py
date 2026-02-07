@@ -1,15 +1,16 @@
 """
-ETL UN Comtrade - Comercio Internacional (UK, Japón, Canadá)
+ETL UN Comtrade - Comercio Internacional (UK, Japón, Canadá, China)
 API: https://comtradeapi.un.org/
 
 Descarga datos HS y los mapea a sectores SITC para:
   - Reino Unido (GB) - Código M49: 826
   - Japón (JP) - Código M49: 392
   - Canadá (CA) - Código M49: 124
+  - China (CN) - Código M49: 156
 
 Usa llamadas batch para minimizar peticiones API (límite 500/día).
 
-Ejecutar: python3 etl_comtrade.py [--force] [--country GB|JP|CA]
+Ejecutar: python3 etl_comtrade.py [--force] [--country GB|JP|CA|CN]
 """
 
 import argparse
@@ -33,6 +34,7 @@ REPORTERS = {
     'GB': {'code': 826, 'name': 'Reino Unido'},
     'JP': {'code': 392, 'name': 'Japón'},
     'CA': {'code': 124, 'name': 'Canadá'},
+    'CN': {'code': 156, 'name': 'China'},
 }
 
 # Mapeo HS 2-dígitos a sectores SITC
@@ -511,7 +513,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='ETL UN Comtrade (batch)')
     parser.add_argument('--force', action='store_true',
                         help='Forzar descarga completa')
-    parser.add_argument('--country', type=str, choices=['GB', 'JP', 'CA'],
+    parser.add_argument('--country', type=str, choices=['GB', 'JP', 'CA', 'CN'],
                         help='Descargar solo un país')
     args = parser.parse_args()
 

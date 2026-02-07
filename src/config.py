@@ -25,12 +25,14 @@ DATA_FOLDERS = {
     'gb': PROJECT_ROOT / 'data' / 'gb',
     'jp': PROJECT_ROOT / 'data' / 'jp',
     'ca': PROJECT_ROOT / 'data' / 'ca',
+    'cn': PROJECT_ROOT / 'data' / 'cn',
 }
 
 # --- Países disponibles para selección ---
 PAISES_V1 = {
     'ES': 'España', 'FR': 'Francia', 'DE': 'Alemania', 'IT': 'Italia',
     'US': 'Estados Unidos', 'GB': 'Reino Unido', 'JP': 'Japón', 'CA': 'Canadá',
+    'CN': 'China',
 }
 
 BANDERAS = {
@@ -86,6 +88,7 @@ SUNBURST_BASE_COLORS = {
 MONEDA_PAIS = {
     'DE': '€', 'ES': '€', 'FR': '€', 'IT': '€',
     'US': '$', 'GB': '$', 'JP': '$', 'CA': '$',
+    'CN': '$',
 }
 
 # --- CSS compacto ---

@@ -39,6 +39,8 @@ def load_partners_data(country_code):
         folder = DATA_FOLDERS['jp']
     elif country_code == 'CA':
         folder = DATA_FOLDERS['ca']
+    elif country_code == 'CN':
+        folder = DATA_FOLDERS['cn']
     else:
         return None
 

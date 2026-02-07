@@ -3,7 +3,7 @@ Script maestro para actualizar todos los datos del widget
 Ejecuta ETLs de múltiples fuentes:
   - Eurostat (EU: DE, ES, FR, IT)
   - US Census Bureau (US)
-  - UN Comtrade (GB, JP, CA)
+  - UN Comtrade (GB, JP, CA, CN)
 """
 
 import subprocess
@@ -55,7 +55,7 @@ Ejemplos:
   python3 update_all_data.py              # Actualizar todos los datos
   python3 update_all_data.py --force      # Forzar actualizacion completa
   python3 update_all_data.py --eu-only    # Solo datos de Eurostat (EU)
-  python3 update_all_data.py --non-eu     # Solo datos no-EU (US, UK, JP, CA)
+  python3 update_all_data.py --non-eu     # Solo datos no-EU (US, UK, JP, CA, CN)
         """
     )
     parser.add_argument('--force', action='store_true',
@@ -63,7 +63,7 @@ Ejemplos:
     parser.add_argument('--eu-only', action='store_true',
                        help='Solo actualizar datos de Eurostat (EU)')
     parser.add_argument('--non-eu', action='store_true',
-                       help='Solo actualizar datos no-EU (US, UK, JP, CA)')
+                       help='Solo actualizar datos no-EU (US, UK, JP, CA, CN)')
     args = parser.parse_args()
 
     print("=" * 80)
@@ -86,6 +86,8 @@ Ejemplos:
             'data/jp/comercio_socios.csv',
             'data/ca/bienes_agregado.csv',
             'data/ca/comercio_socios.csv',
+            'data/cn/bienes_agregado.csv',
+            'data/cn/comercio_socios.csv',
         ]
         for file_name in files_to_clean:
             file_path = Path(file_name)
@@ -111,7 +113,7 @@ Ejemplos:
         )
         # UN Comtrade (UK, Japan, Canada)
         etl_scripts.append(
-            ('etl/etl_comtrade.py', 'UN Comtrade (GB, JP, CA)', True)
+            ('etl/etl_comtrade.py', 'UN Comtrade (GB, JP, CA, CN)', True)
         )
 
     start_total = datetime.now()
@@ -153,6 +155,8 @@ Ejemplos:
         'data/jp/comercio_socios.csv',
         'data/ca/bienes_agregado.csv',
         'data/ca/comercio_socios.csv',
+        'data/cn/bienes_agregado.csv',
+        'data/cn/comercio_socios.csv',
     ]
     for file_name in data_files:
         file_path = Path(file_name)
