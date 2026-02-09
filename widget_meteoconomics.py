@@ -64,7 +64,7 @@ with col_date1:
         "📅 Desde",
         value=fecha_default_inicio,
         min_value=fecha_min_data, max_value=fecha_max_data,
-        format="MM/YYYY",
+        format="DD/MM/YYYY",
     )
 
 with col_date2:
@@ -72,7 +72,7 @@ with col_date2:
         "Hasta",
         value=fecha_max_data,
         min_value=fecha_min_data, max_value=fecha_max_data,
-        format="MM/YYYY",
+        format="DD/MM/YYYY",
     )
 
 # Convertir a datetime para filtrar
