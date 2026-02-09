@@ -18,6 +18,8 @@ def load_goods_data():
                 all_dfs.append(df)
             except Exception as e:
                 st.warning(f"Error cargando {file_path}: {e}")
+        else:
+            st.warning(f"Archivo no encontrado: {file_path}")
 
     if not all_dfs:
         st.error("No hay datos. Ejecuta los ETLs primero.")

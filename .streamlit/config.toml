@@ -1,8 +1,8 @@
 [logger]
-level = "error"
+level = "warning"
 
 [client]
-showErrorDetails = false
+showErrorDetails = true
 
 [runner]
 fastReruns = true
