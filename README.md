@@ -17,7 +17,7 @@ Visualiza exportaciones, importaciones, balanza comercial y socios comerciales d
 - **Selector de fechas** — Rango personalizable (DD/MM/YYYY)
 - **Descarga CSV** — Exporta los datos filtrados del período seleccionado
 - **Multi-moneda** — EUR para países UE, USD para el resto
-- **Avisos de gaps de datos** — Warning visual y rectángulo gris en los gráficos cuando hay períodos sin datos
+- **Avisos de calidad de datos** — Indicadores visuales cuando hay períodos con cobertura limitada
 
 ## Datos disponibles
 
@@ -31,7 +31,7 @@ Visualiza exportaciones, importaciones, balanza comercial y socios comerciales d
 | 🇬🇧 Reino Unido | UN Comtrade | 2010–presente | USD | |
 | 🇯🇵 Japón | UN Comtrade | 2010–presente | USD | |
 | 🇨🇦 Canadá | UN Comtrade | 2010–presente | USD | |
-| 🇨🇳 China | UN Comtrade | 2010–presente | USD | Gap: Oct 2012 – Dic 2015 |
+| 🇨🇳 China | UN Comtrade | 2010–presente | USD | |
 
 ---
 
@@ -155,7 +155,6 @@ cp .env.example .env
 
 ## Limitaciones
 
-- **Gap de datos de China** — Los datos de UN Comtrade para China no están disponibles entre octubre de 2012 y diciembre de 2015. El dashboard señaliza este gap visualmente.
 - **Lag temporal** — Las fuentes oficiales publican datos con ~2 meses de retraso respecto al mes en curso.
 - **Granularidad sectorial** — Clasificación SITC a 1 dígito (10 sectores). Para análisis a nivel de producto sería necesario extender a SITC de 2+ dígitos.
 
