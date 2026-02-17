@@ -4,7 +4,7 @@
 
 El **Widget Meteoconomics** es un dashboard interactivo de análisis de balanza comercial que permite explorar
 los flujos de importación y exportación de bienes de **9 economías** (España, Francia, Alemania, Italia,
-Estados Unidos, Reino Unido, Japón, Canadá y China) con datos mensuales desde 2002.
+Estados Unidos, Reino Unido, Japón, Canadá y China) con datos mensuales.
 
 El proyecto nace de una necesidad real: los datos de comercio internacional están dispersos en múltiples
 fuentes oficiales, cada una con formatos, clasificaciones y periodicidades distintas. Esto dificulta el
@@ -20,11 +20,8 @@ El proyecto integra datos de **tres APIs institucionales**:
 | Fuente | Países | Clasificación nativa | Datos desde |
 |--------|--------|---------------------|-------------|
 | **Eurostat** (Comext) | ES, FR, DE, IT | SITC Rev.4 | 2002 |
-| **US Census Bureau** | US | HS (Harmonized System) | 2002 |
-| **UN Comtrade** | GB, JP, CA, CN | HS → SITC (mapeado) | 2002* |
-
-> \* Los datos de China presentan un gap entre octubre de 2012 y diciembre de 2015 debido a
-> interrupciones en el reporte a UN Comtrade. El widget señaliza este gap visualmente.
+| **US Census Bureau** | US | SITC | 2010 |
+| **UN Comtrade** | GB, JP, CA, CN | HS → SITC (mapeado) | 2010 |
 
 Cada fuente requiere un proceso de extracción, transformación y carga (ETL) específico que normaliza
 los datos a un esquema común: `(fecha, pais, sector, exportaciones, importaciones)`.
@@ -35,16 +32,17 @@ los datos a un esquema común: `(fecha, pais, sector, exportaciones, importacion
 
 ### 3.1 Armonización de fuentes heterogéneas
 
-Las tres fuentes utilizan formatos de respuesta distintos (JSON/CSV), clasificaciones sectoriales
-diferentes (SITC vs HS) y unidades monetarias variadas (EUR vs USD). El proyecto implementa un
-pipeline ETL que normaliza todo a un modelo unificado, permitiendo comparar directamente la balanza
-comercial de España con la de Japón o China.
+Las tres fuentes utilizan formatos de respuesta distintos (JSON/CSV/SDMX), clasificaciones sectoriales
+diferentes y unidades monetarias variadas (EUR vs USD). El proyecto implementa un pipeline ETL que
+normaliza todo a un modelo unificado, permitiendo comparar directamente la balanza comercial de
+España con la de Japón o China.
 
 ### 3.2 Mapeo HS → SITC para consistencia sectorial
 
-Los datos de US Census y UN Comtrade llegan clasificados en el Sistema Armonizado (HS), mientras
-que Eurostat utiliza SITC Rev.4. El ETL incluye un **mapeo HS→SITC a nivel de capítulo** que
-garantiza que los 10 sectores mostrados son consistentes independientemente de la fuente original.
+Los datos de UN Comtrade llegan clasificados en el Sistema Armonizado (HS), mientras que Eurostat
+y US Census Bureau utilizan SITC directamente. El ETL incluye un **mapeo HS→SITC a nivel de
+capítulo** para los datos de Comtrade, garantizando que los 10 sectores mostrados son consistentes
+independientemente de la fuente original.
 
 ### 3.3 Clasificación jerárquica en super-categorías económicas
 
@@ -175,22 +173,13 @@ dependencias necesarias.
 
 ## 7. Limitaciones y transparencia
 
-### 7.1 Gap de datos de China (Oct 2012 – Dic 2015)
-
-Los datos de China procedentes de UN Comtrade presentan un vacío entre octubre de 2012 y
-diciembre de 2015. El widget gestiona esta limitación de forma transparente:
-
-- Muestra un **aviso (warning)** cuando el usuario selecciona un rango que solapa con el gap
-- Dibuja un **rectángulo gris semitransparente** en los gráficos de evolución y bump chart
-  indicando "Sin datos" en el período afectado
-
-### 7.2 Lag temporal de las fuentes
+### 7.1 Lag temporal de las fuentes
 
 Las fuentes oficiales publican datos con un retraso aproximado de 2 meses respecto al mes
 en curso. Este lag es inherente al proceso de recopilación estadística y no es controlable
 por el proyecto.
 
-### 7.3 Granularidad sectorial
+### 7.2 Granularidad sectorial
 
 La clasificación SITC a 1 dígito (10 sectores) ofrece una visión macro. Para análisis más
 detallados a nivel de producto, sería necesario extender el modelo a SITC de 2 o más dígitos.

@@ -27,7 +27,7 @@ Visualiza exportaciones, importaciones, balanza comercial y socios comerciales d
 | 🇪🇸 España | Eurostat | 2002–presente | EUR |
 | 🇫🇷 Francia | Eurostat | 2002–presente | EUR |
 | 🇮🇹 Italia | Eurostat | 2002–presente | EUR |
-| 🇺🇸 Estados Unidos | Census Bureau | 2010–presente | USD |
+| 🇺🇸 Estados Unidos | US Census Bureau | 2010–presente | USD |
 | 🇬🇧 Reino Unido | UN Comtrade | 2010–presente | USD |
 | 🇯🇵 Japón | UN Comtrade | 2010–presente | USD |
 | 🇨🇦 Canadá | UN Comtrade | 2010–presente | USD |
