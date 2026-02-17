@@ -1,4 +1,6 @@
-from src.config import PAISES_NOMBRE, BANDERAS
+import pandas as pd
+
+from src.config import PAISES_NOMBRE, BANDERAS, DATA_GAPS
 
 
 def format_currency(value, symbol='€'):
@@ -48,3 +50,18 @@ def darken_color(hex_color, factor=0.2):
     g = int(g * (1 - factor))
     b = int(b * (1 - factor))
     return f"#{r:02x}{g:02x}{b:02x}"
+
+
+def get_overlapping_gaps(country_code, fecha_inicio, fecha_fin):
+    """Detecta si el rango seleccionado solapa con algún gap de datos conocido.
+
+    Devuelve lista de (gap_start, gap_end, mensaje) para los gaps que solapan.
+    """
+    gaps = DATA_GAPS.get(country_code, [])
+    overlapping = []
+    for gap_start_str, gap_end_str, msg in gaps:
+        gap_start = pd.Timestamp(gap_start_str)
+        gap_end = pd.Timestamp(gap_end_str)
+        if fecha_inicio <= gap_end and fecha_fin >= gap_start:
+            overlapping.append((gap_start, gap_end, msg))
+    return overlapping

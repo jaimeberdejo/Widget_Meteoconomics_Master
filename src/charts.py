@@ -11,7 +11,27 @@ from src.utils import (
 )
 
 
-def create_evolution_chart(df_total, currency_symbol='€'):
+def _add_gap_vrects(fig, data_gaps):
+    """Dibuja rectángulos grises semitransparentes para los gaps de datos."""
+    if not data_gaps:
+        return
+    for gap_start, gap_end, _ in data_gaps:
+        x0_str = gap_start.strftime('%Y-%m-%d')
+        x1_str = gap_end.strftime('%Y-%m-%d')
+        fig.add_vrect(
+            x0=x0_str, x1=x1_str,
+            fillcolor="grey", opacity=0.25,
+            layer="above", line_width=0,
+        )
+        fig.add_annotation(
+            x=gap_start + (gap_end - gap_start) / 2,
+            y=1, yref="paper",
+            text="Sin datos", showarrow=False,
+            font=dict(size=10, color="grey"),
+        )
+
+
+def create_evolution_chart(df_total, currency_symbol='€', data_gaps=None):
     """Crea gráfico de evolución mensual con líneas exp/imp y barras de balance."""
     df_evol = (
         df_total.groupby('fecha')[['exportaciones', 'importaciones']]
@@ -74,10 +94,12 @@ def create_evolution_chart(df_total, currency_symbol='€'):
         hovermode='x unified',
         bargap=0.3,
     )
+    _add_gap_vrects(fig, data_gaps)
     return fig
 
 
-def create_bump_chart(partners_data, flow_type, fecha_inicio, fecha_fin, currency_symbol='€'):
+def create_bump_chart(partners_data, flow_type, fecha_inicio, fecha_fin, currency_symbol='€',
+                      data_gaps=None):
     """Crea bump chart de evolución de socios comerciales."""
     if partners_data is None:
         return None
@@ -147,6 +169,7 @@ def create_bump_chart(partners_data, flow_type, fecha_inicio, fecha_fin, currenc
         legend=dict(orientation='h', y=-0.22, x=0, font=dict(size=8)),
         hovermode='closest',
     )
+    _add_gap_vrects(fig, data_gaps)
     return fig
 
 

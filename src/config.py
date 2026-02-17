@@ -91,6 +91,15 @@ MONEDA_PAIS = {
     'CN': '$',
 }
 
+# --- Gaps de datos conocidos por país ---
+# Formato: código_país -> lista de (fecha_inicio, fecha_fin, mensaje)
+DATA_GAPS = {
+    'CN': [
+        ('2012-10-01', '2015-12-31',
+         'Los datos de China (UN Comtrade) no están disponibles entre Oct 2012 y Dic 2015.'),
+    ],
+}
+
 # --- CSS compacto ---
 CUSTOM_CSS = """
 <style>

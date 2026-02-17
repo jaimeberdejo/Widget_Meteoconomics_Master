@@ -14,7 +14,7 @@ import pandas as pd
 sys.stderr = sys.__stderr__
 
 from src.config import PAISES_V1, MONEDA_PAIS, CUSTOM_CSS
-from src.utils import format_currency
+from src.utils import format_currency, get_overlapping_gaps
 from src.data_loader import load_goods_data, load_partners_data
 from src.charts import create_evolution_chart, create_bump_chart, create_sunburst_chart
 
@@ -82,6 +82,11 @@ fecha_fin = pd.to_datetime(fecha_fin)
 # Filtrar por rango
 df_rango = df_pais[(df_pais['fecha'] >= fecha_inicio) & (df_pais['fecha'] <= fecha_fin)]
 
+# Detectar gaps de datos
+overlapping_gaps = get_overlapping_gaps(country_code, fecha_inicio, fecha_fin)
+for _, _, msg in overlapping_gaps:
+    st.warning(msg)
+
 # Preparar CSV download
 df_download = df_rango[df_rango['sector'] != 'Total Comercio'][
     ['fecha', 'pais', 'sector', 'exportaciones', 'importaciones']
@@ -139,7 +144,7 @@ col_left, col_right = st.columns([2.5, 2])
 # === COLUMNA IZQUIERDA ===
 with col_left:
     st.markdown("##### Evolución Mensual")
-    fig_evol = create_evolution_chart(df_total, currency_symbol)
+    fig_evol = create_evolution_chart(df_total, currency_symbol, data_gaps=overlapping_gaps)
     st.plotly_chart(fig_evol, use_container_width=True, config={"displayModeBar": False})
 
     # --- Bump Chart Socios ---
@@ -151,7 +156,8 @@ with col_left:
 
     partners_data = load_partners_data(country_code)
     fig_bump = create_bump_chart(
-        partners_data, bump_flow, fecha_inicio, fecha_fin, currency_symbol
+        partners_data, bump_flow, fecha_inicio, fecha_fin, currency_symbol,
+        data_gaps=overlapping_gaps,
     )
 
     if fig_bump:
