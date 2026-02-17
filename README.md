@@ -21,17 +21,17 @@ Visualiza exportaciones, importaciones, balanza comercial y socios comerciales d
 
 ## Datos disponibles
 
-| País | Fuente | Período | Moneda | Notas |
-|------|--------|---------|--------|-------|
-| 🇩🇪 Alemania | Eurostat | 2002–presente | EUR | |
-| 🇪🇸 España | Eurostat | 2002–presente | EUR | |
-| 🇫🇷 Francia | Eurostat | 2002–presente | EUR | |
-| 🇮🇹 Italia | Eurostat | 2002–presente | EUR | |
-| 🇺🇸 Estados Unidos | Census Bureau | 2010–presente | USD | |
-| 🇬🇧 Reino Unido | UN Comtrade | 2010–presente | USD | |
-| 🇯🇵 Japón | UN Comtrade | 2010–presente | USD | |
-| 🇨🇦 Canadá | UN Comtrade | 2010–presente | USD | |
-| 🇨🇳 China | UN Comtrade | 2010–presente | USD | |
+| País | Fuente | Período | Moneda |
+|------|--------|---------|--------|
+| 🇩🇪 Alemania | Eurostat | 2002–presente | EUR |
+| 🇪🇸 España | Eurostat | 2002–presente | EUR |
+| 🇫🇷 Francia | Eurostat | 2002–presente | EUR |
+| 🇮🇹 Italia | Eurostat | 2002–presente | EUR |
+| 🇺🇸 Estados Unidos | Census Bureau | 2010–presente | USD |
+| 🇬🇧 Reino Unido | UN Comtrade | 2010–presente | USD |
+| 🇯🇵 Japón | UN Comtrade | 2010–presente | USD |
+| 🇨🇦 Canadá | UN Comtrade | 2010–presente | USD |
+| 🇨🇳 China | UN Comtrade | 2010–presente | USD |
 
 ---
 
