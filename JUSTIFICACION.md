@@ -2,187 +2,220 @@
 
 ## 1. Introducción
 
-El **Widget Meteoconomics** es un dashboard interactivo de análisis de balanza comercial que permite explorar
-los flujos de importación y exportación de bienes de **9 economías** (España, Francia, Alemania, Italia,
-Estados Unidos, Reino Unido, Japón, Canadá y China) con datos mensuales.
+El **Widget Meteoconomics** es un dashboard interactivo que permite analizar la balanza comercial
+de **9 economías** — España, Francia, Alemania, Italia, Estados Unidos, Reino Unido, Japón,
+Canadá y China — con granularidad mensual y sectorial.
 
-El proyecto nace de una necesidad real: los datos de comercio internacional están dispersos en múltiples
-fuentes oficiales, cada una con formatos, clasificaciones y periodicidades distintas. Esto dificulta el
-análisis comparativo entre economías. El widget resuelve este problema ofreciendo una **interfaz unificada**
-que armoniza tres fuentes heterogéneas en un modelo de datos consistente.
+El proyecto parte de un problema concreto: los datos de comercio internacional están fragmentados
+en múltiples fuentes oficiales (Eurostat, US Census Bureau, UN Comtrade), cada una con su propio
+formato de API, clasificación arancelaria y unidad monetaria. Un analista que quiera comparar la
+balanza comercial de Alemania con la de Japón necesita consultar dos fuentes distintas, armonizar
+clasificaciones y normalizar unidades manualmente.
 
----
+El widget resuelve este problema mediante un **pipeline ETL** que integra las tres fuentes en un
+modelo de datos unificado, y un **dashboard interactivo** que permite explorar los datos con
+visualizaciones diseñadas para revelar patrones económicos.
 
-## 2. Fuentes de datos oficiales
+El dataset resultante contiene **más de 73.000 registros** con series temporales de hasta 23 años
+(2002–2025) para los países de la UE y de hasta 15 años (2010–2025) para el resto.
 
-El proyecto integra datos de **tres APIs institucionales**:
-
-| Fuente | Países | Clasificación nativa | Datos desde |
-|--------|--------|---------------------|-------------|
-| **Eurostat** (Comext) | ES, FR, DE, IT | SITC Rev.4 | 2002 |
-| **US Census Bureau** | US | SITC | 2010 |
-| **UN Comtrade** | GB, JP, CA, CN | HS → SITC (mapeado) | 2010 |
-
-Cada fuente requiere un proceso de extracción, transformación y carga (ETL) específico que normaliza
-los datos a un esquema común: `(fecha, pais, sector, exportaciones, importaciones)`.
+**Demo en vivo:** [widget-meteo.streamlit.app](https://widget-meteo.streamlit.app/)
 
 ---
 
-## 3. Valor añadido al análisis económico
+## 2. Fuentes de datos y pipeline ETL
 
-### 3.1 Armonización de fuentes heterogéneas
+### 2.1 Tres APIs institucionales
 
-Las tres fuentes utilizan formatos de respuesta distintos (JSON/CSV/SDMX), clasificaciones sectoriales
-diferentes y unidades monetarias variadas (EUR vs USD). El proyecto implementa un pipeline ETL que
-normaliza todo a un modelo unificado, permitiendo comparar directamente la balanza comercial de
-España con la de Japón o China.
+| Fuente | Países | Clasificación | Formato API | Moneda | Período |
+|--------|--------|---------------|-------------|--------|---------|
+| **Eurostat** (Comext) | ES, FR, DE, IT | SITC Rev.4 | JSON-stat | EUR | 2002–2025 |
+| **US Census Bureau** | US | SITC | JSON | USD | 2010–2025 |
+| **UN Comtrade** | GB, JP, CA, CN | HS (mapeado a SITC) | JSON | USD | 2010–2025 |
 
-### 3.2 Mapeo HS → SITC para consistencia sectorial
+### 2.2 Desafíos técnicos del ETL
 
-Los datos de UN Comtrade llegan clasificados en el Sistema Armonizado (HS), mientras que Eurostat
-y US Census Bureau utilizan SITC directamente. El ETL incluye un **mapeo HS→SITC a nivel de
-capítulo** para los datos de Comtrade, garantizando que los 10 sectores mostrados son consistentes
-independientemente de la fuente original.
+Cada fuente presenta desafíos específicos que el ETL resuelve:
 
-### 3.3 Clasificación jerárquica en super-categorías económicas
+- **Eurostat**: requiere construir consultas con códigos de flujo (`FLOW`), reporter (`REPORTER`)
+  y clasificación SITC de forma dinámica. Los datos de 4 países europeos se descargan y procesan
+  en un único pipeline.
 
-Sobre los 10 sectores SITC, el widget aplica una **agrupación en 5 super-categorías** con significado
-económico claro:
+- **US Census Bureau**: utiliza endpoints distintos para exportaciones (`/HS`) e importaciones,
+  con estructuras de respuesta diferentes que deben unificarse.
 
-- **Agro y Alimentos** — Sectores 0, 1, 4
-- **Minería y Energía** — Sectores 2, 3
-- **Químicos** — Sector 5
-- **Manufacturas** — Sectores 6, 7, 8
-- **Otros** — Sector 9
+- **UN Comtrade**: la complejidad más alta. La API devuelve datos clasificados en el Sistema
+  Armonizado (HS), no en SITC. El ETL implementa un **mapeo HS→SITC a nivel de capítulo**
+  (97 capítulos HS → 10 sectores SITC) para garantizar consistencia con las otras fuentes.
+  Además, la API devuelve desgloses por modo de transporte (`motCode`) y país de consignación
+  (`partner2Code`) que deben filtrarse para evitar doble conteo — un problema sutil que infla
+  los valores hasta 5x si no se detecta.
 
-Esta jerarquía permite analizar la estructura productiva de cada economía a dos niveles de detalle.
+### 2.3 Modelo de datos unificado
 
-### 3.4 KPIs clave
+Todas las fuentes se normalizan a un esquema común:
 
-El dashboard calcula y muestra cuatro indicadores para el período seleccionado:
+```
+(fecha, pais, sector, exportaciones, importaciones, balance)
+```
 
-- **Total exportaciones** e **importaciones** — Volumen agregado
-- **Balanza comercial** — Superávit o déficit
-- **Tasa de cobertura** — Ratio exportaciones/importaciones (>100% = superávit)
+Esto permite que la capa de visualización sea completamente agnóstica respecto al origen de los
+datos: el mismo código genera gráficos para España (Eurostat, EUR) y para Japón (UN Comtrade, USD).
 
 ---
 
-## 4. Creatividad y funcionalidades
+## 3. Valor añadido
 
-### 4.1 Bump chart de socios comerciales
+### 3.1 Clasificación jerárquica en super-categorías económicas
 
-El **bump chart** muestra la evolución del ranking de los 10 principales socios comerciales a lo
-largo del tiempo. Este tipo de visualización es poco común en dashboards de comercio exterior y
-permite identificar rápidamente:
+Sobre los 10 sectores SITC, el widget aplica una **agrupación en 5 super-categorías** con
+significado macroeconómico:
 
-- Cambios en las relaciones bilaterales (p.ej., ascenso de China como socio de la UE)
-- Impactos de eventos geopolíticos (sanciones, acuerdos comerciales)
-- Estabilidad o volatilidad de las dependencias comerciales
+| Super-categoría | Sectores SITC | Significado |
+|----------------|---------------|-------------|
+| **Agro y Alimentos** | 0, 1, 4 | Sector primario alimentario |
+| **Minería y Energía** | 2, 3 | Materias primas y combustibles |
+| **Químicos** | 5 | Industria farmacéutica y química |
+| **Manufacturas** | 6, 7, 8 | Industria transformadora |
+| **Otros** | 9 | Mercancías no clasificadas |
 
-### 4.2 Sunburst jerárquico doble (importaciones vs exportaciones)
+Esta jerarquía permite analizar la estructura productiva a dos niveles de detalle y revela
+patrones como la dependencia energética de un país frente a su capacidad exportadora en
+manufacturas.
 
-Dos gráficos sunburst permiten comparar visualmente la **composición sectorial** de importaciones
-y exportaciones. La disposición lado a lado revela **asimetrías estructurales**: por ejemplo,
-un país que exporta principalmente manufacturas pero importa energía y materias primas.
+### 3.2 KPIs de síntesis
 
-Cada segmento muestra valor absoluto y porcentaje, con colores consistentes entre ambos gráficos
-para facilitar la comparación.
+El dashboard calcula cuatro indicadores para cualquier período y país:
 
-### 4.3 Evolución dual-axis (líneas + barras de balance)
+- **Exportaciones e importaciones totales** — Volumen agregado del período
+- **Balanza comercial** — Diferencia neta (superávit o déficit)
+- **Tasa de cobertura** — Ratio exportaciones/importaciones (>100% indica superávit)
 
-El gráfico de evolución combina:
+Estos KPIs se actualizan dinámicamente al cambiar el país o el rango de fechas.
 
-- **Líneas** para exportaciones e importaciones (eje izquierdo)
-- **Barras** para el balance comercial (eje derecho)
+---
 
-Esta representación dual permite ver simultáneamente la tendencia de los flujos y su diferencial,
-con colores que indican superávit (verde) o déficit (rojo).
+## 4. Visualizaciones
+
+### 4.1 Evolución mensual dual-axis
+
+El gráfico principal combina dos representaciones en un solo panel:
+
+- **Líneas** (eje izquierdo): tendencia de exportaciones e importaciones
+- **Barras** (eje derecho): balance comercial mensual, con color verde (superávit) o rojo (déficit)
+
+Esta combinación permite identificar simultáneamente la evolución de los flujos y su diferencial.
+Por ejemplo, se puede observar cómo durante el COVID-19 (2020) las importaciones cayeron antes
+que las exportaciones en la mayoría de economías, generando superávits transitorios.
+
+### 4.2 Bump chart de socios comerciales
+
+El **bump chart** muestra la evolución del ranking de los 10 principales socios comerciales
+a lo largo del tiempo. Es una visualización poco convencional en dashboards de comercio exterior
+que permite detectar:
+
+- **Cambios estructurales**: el ascenso de China como primer socio comercial de Alemania
+- **Impactos geopolíticos**: caída de Rusia como socio tras las sanciones de 2022
+- **Dependencias comerciales**: la estabilidad de EE.UU. como primer socio de Canadá
+
+### 4.3 Sunburst jerárquico doble
+
+Dos gráficos sunburst muestran la **composición sectorial** de importaciones y exportaciones
+en disposición lado a lado. El anillo interior representa las super-categorías y el exterior
+los sectores SITC individuales.
+
+Esta visualización revela **asimetrías estructurales**: Alemania exporta principalmente
+manufacturas (>70%) pero importa un mix más diversificado; Japón importa energía y exporta
+maquinaria; España tiene un perfil más equilibrado entre sectores.
 
 ### 4.4 Descarga CSV
 
-El usuario puede descargar los datos del período seleccionado en formato CSV para análisis propio
-en Excel, Python, R u otras herramientas.
+El usuario puede exportar los datos del período seleccionado en formato CSV para análisis
+propio en Excel, Python, R u otras herramientas.
 
 ---
 
-## 5. Utilidad práctica
+## 5. Casos de uso
 
-### 5.1 Identificación de tendencias y shocks económicos
+### 5.1 Detección de shocks económicos
 
-La granularidad mensual permite detectar eventos como:
+La granularidad mensual permite observar el impacto de eventos como:
 
-- Caídas abruptas del comercio (COVID-19, crisis financiera 2008)
-- Recuperaciones asimétricas entre importaciones y exportaciones
-- Estacionalidad en sectores específicos
+- **COVID-19 (2020)**: caída sincronizada del comercio global, con recuperación asimétrica
+- **Crisis energética (2022)**: aumento de importaciones en el sector de combustibles
+  minerales, especialmente visible en países europeos dependientes de gas
+- **Brexit (2021)**: cambio en los patrones comerciales de Reino Unido con la UE
 
-### 5.2 Análisis de dependencias bilaterales
+### 5.2 Análisis de competitividad
 
-El bump chart revela la concentración o diversificación de socios comerciales, información
-relevante para evaluar riesgos geopolíticos y cadenas de suministro.
+Comparando los sunbursts de dos países se pueden identificar ventajas competitivas:
+la tasa de cobertura por sector revela en qué industrias un país es exportador neto
+(competitivo) o importador neto (dependiente).
 
-### 5.3 Comparativa sectorial entre economías
+### 5.3 Evaluación de riesgo geopolítico
 
-La estructura jerárquica (super-categorías → sectores SITC) permite comparar perfiles productivos:
-¿Es Alemania más dependiente de manufacturas que España? ¿Cómo se distribuyen las importaciones
-energéticas de Japón frente a las de Italia?
-
-### 5.4 Soporte a análisis fundamental y técnico
-
-Los datos descargables pueden alimentar modelos cuantitativos, análisis de correlación con tipos
-de cambio, o estudios de competitividad sectorial.
+El bump chart permite evaluar la concentración de socios comerciales: un país cuyo
+comercio depende de pocos socios tiene mayor exposición a disrupciones que uno con
+una base diversificada.
 
 ---
 
 ## 6. Arquitectura técnica
 
-### 6.1 Modularidad
-
-El proyecto sigue una estructura modular clara:
+### 6.1 Estructura modular
 
 ```
 Widget_Meteoconomics_Master/
-├── widget_meteoconomics.py   # Aplicación principal (Streamlit)
+├── widget_meteoconomics.py       # App principal (Streamlit)
+├── update_all_data.py            # Orquestador de actualización
 ├── src/
-│   ├── config.py             # Configuración centralizada
-│   ├── data_loader.py        # Carga y caché de datos
-│   ├── charts.py             # Funciones de visualización (Plotly)
-│   └── utils.py              # Utilidades de formato
-├── data/                     # Datos por país (CSV procesados)
-│   ├── eu/                   # Eurostat: ES, FR, DE, IT
-│   ├── us/                   # US Census Bureau
-│   ├── gb/                   # UN Comtrade: Reino Unido
-│   ├── jp/                   # UN Comtrade: Japón
-│   ├── ca/                   # UN Comtrade: Canadá
-│   └── cn/                   # UN Comtrade: China
-└── etl/                      # Scripts de extracción y transformación
+│   ├── config.py                 # Constantes: países, sectores, colores
+│   ├── data_loader.py            # Carga y caché de datos
+│   ├── charts.py                 # Visualizaciones (Plotly)
+│   └── utils.py                  # Formateo y utilidades
+├── etl/
+│   ├── etl_data.py               # Pipeline Eurostat
+│   ├── etl_us.py                 # Pipeline US Census Bureau
+│   └── etl_comtrade.py           # Pipeline UN Comtrade
+└── data/                         # CSVs procesados por país
 ```
 
-### 6.2 ETL incremental y caché
+La separación entre ETL, lógica de negocio y presentación permite modificar cualquier
+capa sin afectar a las demás.
 
-- Los scripts ETL pueden ejecutarse de forma incremental, descargando solo los meses faltantes
-- Streamlit cachea los DataFrames en memoria (`@st.cache_data`) para evitar recargas innecesarias
-- Los datos procesados se almacenan como CSV planos, facilitando la portabilidad
+### 6.2 Actualización incremental
 
-### 6.3 Despliegue en Streamlit Cloud
+Los scripts ETL detectan la última fecha disponible en los CSVs existentes y descargan
+solo los meses faltantes, minimizando las llamadas a las APIs (relevante para UN Comtrade,
+que tiene un límite de 500 peticiones/día).
 
-La aplicación está preparada para despliegue directo en **Streamlit Community Cloud**, sin
-necesidad de infraestructura adicional. El archivo `requirements.txt` incluye todas las
-dependencias necesarias.
+### 6.3 Caché y rendimiento
+
+Streamlit cachea los DataFrames en memoria mediante `@st.cache_data`, evitando releer
+los CSVs en cada interacción del usuario. Los datos procesados se almacenan como CSV
+planos, formato que garantiza portabilidad y facilita la inspección manual.
+
+### 6.4 Despliegue
+
+La aplicación está desplegada en **Streamlit Community Cloud** con despliegue continuo
+vinculado al repositorio de GitHub. Cada push a `main` actualiza automáticamente la
+aplicación en producción.
 
 ---
 
-## 7. Limitaciones y transparencia
+## 7. Limitaciones
 
-### 7.1 Lag temporal de las fuentes
+- **Lag temporal**: las fuentes oficiales publican datos con ~2 meses de retraso respecto
+  al mes en curso, inherente al proceso de recopilación estadística.
 
-Las fuentes oficiales publican datos con un retraso aproximado de 2 meses respecto al mes
-en curso. Este lag es inherente al proceso de recopilación estadística y no es controlable
-por el proyecto.
+- **Granularidad sectorial**: la clasificación SITC a 1 dígito (10 sectores) ofrece una
+  visión macro. Para análisis a nivel de producto sería necesario extender a SITC de 2+
+  dígitos.
 
-### 7.2 Granularidad sectorial
-
-La clasificación SITC a 1 dígito (10 sectores) ofrece una visión macro. Para análisis más
-detallados a nivel de producto, sería necesario extender el modelo a SITC de 2 o más dígitos.
+- **Servicios no incluidos**: el dashboard cubre solo comercio de bienes. El comercio de
+  servicios (turismo, financiero, tecnológico) no está reflejado, lo que subestima la
+  balanza comercial total de economías como Reino Unido donde los servicios representan
+  una parte significativa.
 
 ---
 
