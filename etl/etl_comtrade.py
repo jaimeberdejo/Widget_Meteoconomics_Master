@@ -244,10 +244,19 @@ def download_bienes_agregado(country_code, incremental=True):
             period = str(rec.get('period', ''))
             if len(period) < 6:
                 continue
+            # Filtrar: solo totales globales, ignorar desgloses por transporte/consignación
+            mot = rec.get('motCode')
+            if mot is not None and str(mot) != '0':
+                continue
+            p2 = rec.get('partner2Code')
+            if p2 is not None and str(p2) != '0':
+                continue
             y, m = int(period[:4]), int(period[4:])
             fecha = f"{y}-{m:02d}"
             flow = rec.get('flowCode', '')
-            hs_code = str(rec.get('cmdCode', ''))[:2]
+            hs_code = str(rec.get('cmdCode', ''))
+            if len(hs_code) != 2:
+                continue
             value = rec.get('primaryValue', 0) or 0
             sitc_code = HS_TO_SITC.get(hs_code, '9')
 
@@ -306,6 +315,7 @@ def download_bienes_agregado(country_code, incremental=True):
 
     if existing_df is not None and not df_new.empty:
         df_final = pd.concat([existing_df, df_new], ignore_index=True)
+        df_final['fecha'] = df_final['fecha'].astype(str).str[:7]
         df_final = df_final.drop_duplicates(
             subset=['fecha', 'sector_code'], keep='last'
         )
